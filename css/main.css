@@ -1,0 +1,654 @@
+html, body {
+  padding     : 0;
+  margin      : 0;
+  width       : 100%;
+  height      : 100%;
+  font-family : Helvetica, Segoe UI, sans-serif;
+  overflow    : hidden;
+  color       : #444;
+}
+
+.esriRTL label {
+  /*Example of a rule that will be applied if the app is viewed in a browser with a RTL locale like Hebrew or Arabic.*/
+}
+
+/* MAIN APP MESSAGES =========================================================== */
+.app-error .loading-message {
+  background  : url(../images/error.png) no-repeat top center;
+  padding-top : 60px;
+  width       : 100%;
+  position    : absolute;
+  z-index     : 2;
+  top         : 40%;
+  left        : 0;
+  text-align  : center;
+}
+
+.message-node {
+  position         : absolute;
+  top              : 30%;
+  z-index          : 99;
+  width            : 100%;
+  padding          : 40px;
+  text-align       : center;
+  font-size        : 2em;
+  background-color : rgba(51, 102, 153, 0.8);
+}
+
+.message-node .small-text {
+  padding        : 5px !important;
+  font-size      : smaller !important;
+  display        : table-cell;
+  vertical-align : middle;
+}
+
+.message-node span {
+  color       : #fff;
+  text-shadow : 1px 1px 0 #222;
+}
+
+.error-node span {
+  color : darkred;
+}
+
+/* MAIN APP MESSAGES =========================================================== */
+
+#main-container {
+  width  : 100%;
+  height : 100%;
+  margin : 0;
+  /*padding : 0;*/
+}
+
+#main-container .dijitContentPane {
+  /*border : none !important;*/
+}
+
+#main-top-pane {
+  line-height      : 2.2em;
+  overflow         : hidden;
+  color            : #fff;
+  background-color : #336699;
+}
+
+#app-title {
+  font-size   : 2em;
+  font-weight : bolder;
+}
+
+#app-sub-title {
+  font-size  : smaller;
+  font-style : italic;
+  margin     : 0 30px;
+}
+
+#app-sub-title a {
+  color : #fff;
+}
+
+#portaluser-section {
+  position : absolute;
+  top      : 5px;
+  right    : 5px;
+  height   : 100%;
+}
+
+.user-thumb {
+  height         : 46px;
+  border-radius  : 23px;
+  vertical-align : middle;
+}
+
+#full-list-node,
+#style-list-node,
+#color-list-node,
+#search-results-node {
+  width     : 100%;
+  height    : 100%;
+  font-size : smaller !important;
+}
+
+#main-right-pane {
+  width : 30%;
+}
+
+#main-right-pane,
+#main-center-pane,
+#main-left-pane {
+  padding : 0;
+}
+
+#main-left-pane {
+  width : 30%;
+}
+
+#main-left-top-container {
+  height  : 50%;
+  padding : 0 !important;
+}
+
+#main-left-top-toolbar {
+  padding        : 5px;
+  line-height    : 2.5em;
+  vertical-align : middle;
+}
+
+#update-btn-node {
+  float : right;
+}
+
+#main-left-top-pane,
+#full-list-pane,
+#search-pane {
+  padding : 0 !important;
+}
+
+.claro .dijitToolbar .dijitButton .dijitButtonNode,
+.claro .dijitToolbar .dijitButtonActive .dijitButtonNode,
+.claro .dijitToolbar .dijitButtonDisabled .dijitButtonNode,
+.claro .dijitToolbar .dijitButtonHover .dijitButtonNode {
+  padding : 4px !important;
+}
+
+.claro .dijitToolbar .dijitButtonHover .dijitButtonNode {
+  background : #4183c4 !important;
+}
+
+.dgrid {
+  height : 100% !important;
+  border : none !important;
+}
+
+.dgrid-autoheight .dgrid-scroller {
+  overflow-y : hidden !important;
+}
+
+#search-results-node .dgrid-column-0,
+.dgrid-selector,
+.field-visibility {
+  width : 32px;
+}
+
+#color-pallet-node {
+  width  : 100%;
+  height : 90%;
+}
+
+.dgrid-no-data,
+.dgrid-loading {
+  color      : #ccc;
+  font-size  : 2.5em;
+  padding    : 1.5em;
+  text-align : center;
+}
+
+.dgrid-row {
+  border-bottom : solid 1px #eee;
+}
+
+#full-list-node .dgrid-row,
+#search-results-node .dgrid-row {
+  padding : 5px 0;
+}
+
+#item-list-node .dgrid-row {
+  cursor : pointer !important;
+}
+
+.dgrid-cell {
+  height         : 100%;
+  border         : none !important;
+  vertical-align : middle !important;
+}
+
+.dgrid-highlight {
+  background-color : rgba(255, 255, 112, 0.75);
+}
+
+.dgrid-selected {
+  /*background-color : #bfd6eb !important;*/
+}
+
+.field-id,
+.field-source-layer {
+  width : 150px !important;
+}
+
+.field-id[role="gridcell"] {
+  cursor          : pointer;
+  text-decoration : dotted underline red;
+}
+
+.field-id[role="gridcell"]:hover {
+  color           : red;
+  text-decoration : solid underline red;
+}
+
+.field-owner {
+  width : 120px !important;
+}
+
+.field-zoom,
+.field-minzoom,
+.field-maxzoom {
+  width          : 120px !important;
+  text-align     : center !important;
+  pointer-events : none;
+}
+
+.claro .dijitSliderImageHandleH {
+  opacity : 0.0;
+  /*background-image : url("../images/sliderThumbs.png");*/
+}
+
+.claro .dijitSliderHover .dijitSliderImageHandleH {
+  /*opacity : 1.0;*/
+}
+
+.claro .dijitSlider .dijitSliderProgressBar {
+  background : #336699;
+  height     : 12px;
+  overflow   : visible;
+  margin-top : -4px;
+}
+
+.claro .dijitSliderBumper {
+  display : none !important;
+}
+
+.field-type {
+  width        : 70px !important;
+  text-align   : center !important;
+  border-right : solid 1px #eee !important;
+}
+
+.field-background-color,
+.field-fill-color,
+.field-fill-outline-color,
+.field-line-color,
+.field-icon-color,
+.field-icon-halo-color,
+.field-text-color,
+.field-text-halo-color,
+.field-circle-color {
+  text-align : center !important;
+}
+
+.color-cell {
+  cursor    : pointer;
+  padding   : 2px 0;
+  font-size : 8pt !important;
+}
+
+.color-cell:hover {
+  color : red !important;
+}
+
+.field-access {
+  width      : 80px;
+  text-align : right !important;
+}
+
+.field-filter {
+  width : 150px !important;
+}
+
+.field-paint:hover {
+  cursor           : pointer;
+  color            : #fff;
+  background-color : #f00;
+}
+
+#map-node {
+  width  : 100%;
+  height : 100%;
+}
+
+#eye-tool-node {
+  z-index  : 99;
+  position : absolute;
+  top      : 2px;
+  left     : 115px
+}
+
+#eye-tool-node .dijitButtonText {
+  padding : 4px;
+}
+
+.dijitTitlePane * {
+  /*border : none !important;*/
+  outline : none !important;
+}
+
+.claro .dijitTitlePaneTitle {
+  background-image : none !important;
+  border           : 1px solid #fff !important;
+  font-weight      : bolder;
+}
+
+.claro .dijitTitlePaneTitleHover,
+.claro .dijitTitlePaneTitleOpen,
+.claro .dijitTitlePaneTitleFixedOpen {
+  color            : #fff;
+  background-color : #336699;
+  border-color     : #336699;
+}
+
+.claro .dijitTitlePaneContentOuter {
+  border : none !important;
+}
+
+.jsoneditor-node {
+  width  : 800px;
+  height : 500px;
+}
+
+.dijitDialogTitleBar,
+.dijitButtonNode {
+  background : #336699 !important;
+  border     : none !important;
+}
+
+.dijitButtonDisabled .dijitButtonNode {
+  background : #ccc !important;
+}
+
+.dijitDialogTitle,
+.dijitButtonText {
+  color : #fff !important;
+}
+
+.dijitTab {
+  color : #878787 !important;
+}
+
+.dijitTabHover,
+.dijitTabActive {
+  color      : #444 !important;
+  background : #bfd6eb !important;
+}
+
+.dijitTabChecked {
+  color      : #fff !important;
+  background : #336699 !important;
+}
+
+.dijitTabChecked * {
+  outline : none !important;
+}
+
+#json-editor-node {
+  width  : 100%;
+  height : 100%;
+}
+
+#search-options-container {
+  height : 250px;
+}
+
+#search-type-pane {
+  width : 140px
+}
+
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {
+  width  : 100% !important;
+  height : auto !important;
+}
+
+.claro .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {
+  background-color : #fff;
+  border           : none;
+}
+
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {
+  height     : auto;
+  overflow-y : auto;
+}
+
+.claro .dojoxCheckedMultiSelectHover .dojoxCheckedMultiSelectWrapper {
+  background : none !important;
+  border     : none !important;
+}
+
+#color-selector-container {
+  width  : 725px;
+  height : 225px;
+}
+
+#color-selector-custom-container {
+  width : 350px;
+}
+
+#search-toolbar {
+  line-height    : 3em;
+  vertical-align : middle;
+}
+
+.dijitColorPalette,
+.dojoxColorPicker {
+  background : none !important;
+  border     : none !important;
+}
+
+.replace-color-pane {
+  padding : 5px;
+}
+
+.selected-color-pane {
+  float   : left;
+  padding : 5px;
+}
+
+.replace-color-node,
+.selected-color-node {
+  display        : table-cell;
+  vertical-align : middle;
+}
+
+.color-node {
+  width       : 20px;
+  height      : 20px;
+  margin-left : 2px;
+  display     : inline-block;
+  border      : solid 1px #ddd;
+}
+
+.color-node.selectable {
+  cursor       : pointer;
+  border-color : #555;
+  box-shadow   : 0 0 4px #ddd;
+}
+
+.color-node.selectable:hover {
+  border-color : #fff;
+  box-shadow   : 0 0 6px #ddd;
+}
+
+.color-node.selected {
+  border-color : red;
+}
+
+.color-name-node {
+  margin-left : 2px;
+}
+
+#color-pallet-pane {
+  height : 150px;
+}
+
+.pallet-node {
+  float  : left;
+  margin : 3px;
+}
+
+.pallet-node.small {
+  width  : 14px;
+  height : 14px;
+  margin : 2px;
+}
+
+#style-layer-type-select .dijitInputField {
+  color : #444 !important;
+}
+
+#update-btn-node .undo-redo-btn .dijitButtonText {
+  font-weight : bold;
+}
+
+.search-label {
+  font-weight   : bolder;
+  margin-bottom : 3px;
+}
+
+#full-list-toolbar {
+  padding : 10px;
+}
+
+.select-node {
+  cursor         : pointer;
+  display        : inline-block;
+  vertical-align : middle;
+  width          : 24px;
+  height         : 24px;
+}
+
+#select-all-filter {
+  background : url(../images/SelectAll.png) no-repeat center / contain;
+}
+
+#select-none-filter {
+  background : url(../images/SelectNone.png) no-repeat center / contain;
+}
+
+.clear-node {
+  float      : right;
+  cursor     : pointer;
+  width      : 24px;
+  height     : 24px;
+  background : url(../images/GenericDeleteRed32.png) no-repeat center / contain;
+}
+
+.esriSimpleSliderTL {
+  left : 5px;
+  top  : 5px;
+}
+
+#home-button-node {
+  z-index  : 99;
+  position : absolute;
+  top      : 5px;
+  left     : 75px;
+}
+
+#home-button-node .home {
+  background-color : #336699;
+!important;
+}
+
+#search-node {
+  z-index  : 99;
+  position : absolute;
+  top      : 5px;
+  right    : 5px;
+}
+
+#zoom-node {
+  z-index    : 99;
+  position   : absolute;
+  bottom     : 5px;
+  left       : 5px;
+  padding    : 3px;
+  font-size  : smaller;
+  color      : #336699;
+  background : rgba(255, 255, 255, 0.8);
+}
+
+#color-pallet-pane,
+#style-layer-pane {
+  overflow : hidden;
+}
+
+#style-layer-pane {
+  border-right : 1px solid #ddd;
+}
+
+.dialog-content {
+  width  : 600px;
+  height : 300px;
+}
+
+.basemap-node {
+  cursor     : pointer;
+  padding    : 3px;
+  min-height : 80px;
+}
+
+.basemap-title-node {
+  font-size : larger;
+}
+
+.basemap-thumb-node {
+  float  : left;
+  height : 50px;
+  margin : 3px;
+}
+
+.basemap-snippet-node,
+.basemap-description-node {
+  padding   : 3px 3px 3px 10px;
+  font-size : smaller;
+  color     : #666;
+}
+
+.item-title {
+  float  : left;
+  margin : 3px;
+}
+
+.item-title .dijitValidationTextBox {
+  width : 325px;
+}
+
+#grayscale-select .dijitSelectLabel {
+  color : #444 !important;
+}
+
+.variations-node {
+  float       : left;
+  margin-left : 20px;
+  font-size   : smaller;
+}
+
+.variations-grid {
+  height : 25px !important;
+}
+
+.variations-grid .dgrid {
+  /*height : unset !important;*/
+}
+
+.claro .dijitToggleButton .dijitCheckBoxIcon {
+  background-image : url("../images/checkmarkNoBorder.png");
+}
+
+.basemap-item-action {
+  float       : right;
+  line-height : 2em;
+  font-size   : x-small;
+  color       : #999;
+  opacity     : 0.0;
+  transition  : opacity 0.3s;
+}
+
+.basemap-item-title:hover > .basemap-item-action {
+  opacity    : 1.0 !important;
+  transition : opacity 0.3s;
+}
+
+.basemap-item-action:hover {
+  color : #336699;
+}
+
+.basemap-item-action:active {
+  color : #21cdfa;
+}

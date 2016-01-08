@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vector Basemap Style Editor</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="no">
+    <meta name="apple-mobile-web-app-capable" content="no">
+    <link rel="stylesheet" href="//js.arcgis.com/3.15/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.15/dojox/form/resources/CheckedMultiSelect.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.15/dojox/form/resources/RangeSlider.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.15/esri/css/esri.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="./js/jsoneditor-master/dist/jsoneditor.css">
+    <script type="text/javascript">
+      var package_path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      var dojoConfig = {
+        async: true,
+        parseOnLoad: true,
+        packages: [
+          {
+            name: "application",
+            location: package_path + '/js'
+          },
+          {
+            name: "config",
+            location: package_path + '/config'
+          },
+          {
+            name: "arcgis_templates",
+            location: package_path + '/..'
+          }
+        ]
+      };
+    </script>
+    <script type="text/javascript" src="//js.arcgis.com/3.15/"></script>
+    <script type="text/javascript">
+      require([
+        "dojo/ready",
+        "dojo/_base/lang",
+        "config/templateConfig",
+        "application/template",
+        "application/main",
+        "dijit/layout/BorderContainer",
+        "dijit/layout/TabContainer",
+        "dijit/layout/ContentPane",
+        "dijit/ConfirmDialog",
+        "dijit/form/CheckBox",
+        "dijit/form/Select",
+        "dojox/form/CheckedMultiSelect"
+      ], function (ready, lang, templateConfig, Template, Main) {
+
+        Main.displayMessage("Welcome...");
+
+        var myTemplate = new Template(templateConfig);
+        myTemplate.startup().then(function (config) {
+          ready(lang.hitch(this, function (evt) {
+            var myApp = new Main(config);
+            myApp.startup();
+          }));
+        }, Main.displayMessage);
+
+      });
+    </script>
+  </head>
+  <body class="claro">
+    <div id="main-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:true">
+      <div id="main-top-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+        <table id="app-title-section">
+          <tr>
+            <td>
+              <span id="app-title">Vector Basemap Style Editor</span>
+              <span id="app-sub-title">
+                <a href="http://blogs.esri.com/esri/arcgis/tag/vector-basemap/" target="_blank">Esri Vector Basemaps</a>
+                <span>|</span>
+                <a href="https://www.mapbox.com/mapbox-gl-style-spec/" target="_blank">Style Reference</a>
+              </span>
+            </td>
+          </tr>
+        </table>
+        <table id="portaluser-section"></table>
+      </div>
+      <div id="main-left-pane" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region:'left',gutters:true,splitter:true">
+        <div id="main-left-top-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region:'top',gutters:false,splitter:true">
+          <div id="main-left-top-toolbar" data-dojo-type="dijit/Toolbar" data-dojo-props="region:'top'">
+            <div id="create-copy-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Copy Esri Basemap',disabled:true"></div>
+            <div id="update-btn-node">
+              <div id="undo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Undo'">&#x21b6;</div>
+              <div id="redo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Redo'">&#x21b7;</div>
+              <div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Basemap Item',disabled:true"></div>
+            </div>
+          </div>
+          <div id="main-left-top-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+            <div id="item-list-node"></div>
+          </div>
+        </div>
+        <div id="main-right-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+          <div id="map-node" dir="ltr">
+            <div id="home-button-node"></div>
+            <div id="search-node"></div>
+            <div id="zoom-node" class="dijitHidden">Level: 1</div>
+            <div id="eye-tool-node" class="dijitHidden">
+              <div id="eye-tool" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="label:'Pick Color',iconClass:'dijitCheckBoxIcon'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="main-center-pane" data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'">
+        <div id="full-list-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="title:'Style Layers',gutters:false">
+          <div id="full-list-toolbar" data-dojo-type="dijit/Toolbar" data-dojo-props="region:'top'">
+            <span id="clear-source-layer-filter" class="clear-node" title="clear all filters"></span>
+            <span id="select-all-filter" class="select-node dijitHidden" title="Display ALL"></span>
+            <span id="select-none-filter" class="select-node dijitHidden" title="Display NONE"></span>
+            <span data-dojo-type="dijit/ToolbarSeparator" class="dijitHidden"></span>
+            <label for="current-zoom-chk" class="search-label">Current map zoom level:</label>
+            <div id="current-zoom-chk" data-dojo-type="dijit/form/CheckBox" data-dojo-props="checked:false"></div>
+            <span data-dojo-type="dijit/ToolbarSeparator"></span>
+            <label for="filter-input" class="search-label">Search:</label>
+            <div id="filter-input" data-dojo-type="dijit/form/TextBox" data-dojo-props="intermediateChanges:true,placeHolder:'enter filter here',style:{width:'300px'}"></div>
+            <!--<span data-dojo-type="dijit/ToolbarSeparator"></span>-->
+            <span class="search-label">OR source-layer:</span>
+            <span id="source-layer-combo"></span>
+          </div>
+          <div id="full-list-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+            <div id="full-list-node"></div>
+          </div>
+        </div>
+        <div id="search-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:false,title:'Find By Color'">
+          <div id="search-options-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region:'top',gutters:false">
+            <div id="style-layer-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'left'">
+              <div class="search-label">Style Type</div>
+              <div id="style-layer-type-select" data-dojo-type="dojox/form/CheckedMultiSelect" data-dojo-props="dropDown:false,multiple:true,labelAttr:'name'"></div>
+            </div>
+            <div id="color-pallet-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+              <div class="search-label">Basemap Color Palette</div>
+              <div id="color-pallet-node"></div>
+            </div>
+            <div id="search-toolbar" data-dojo-type="dijit/Toolbar" data-dojo-props="region:'bottom'">
+              <div id="color-search-replace-node">
+                <label class="search-label">Replace</label>
+                <span id="replace-source-color-node" class="replace-color-pane"></span>
+                <label>with</label>
+                <span id="replace-target-color-node" class="replace-color-pane"></span>
+                <div id="replace-color-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Replace Color'"></div>
+              </div>
+            </div>
+          </div>
+          <div id="search-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+            <div id="search-results-node"></div>
+          </div>
+        </div>
+        <!--<div id="json-editor-container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="title:'Style JSON',gutters:true">
+          <div id="json-editor-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+            <div id="json-editor-node"></div>
+          </div>
+        </div>-->
+      </div>
+    </div>
+    <div id="style-layer-editor-dialog" data-dojo-type="dijit/ConfirmDialog" data-dojo-props="title:'Edit Style Layer Property',closable:false"></div>
+  </body>
+</html>

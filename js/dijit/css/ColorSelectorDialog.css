@@ -1,0 +1,15 @@
+
+@import url("//js.arcgis.com/3.15/dojox/widget/ColorPicker/ColorPicker.css");
+
+.colorSelectorDlg {
+  /*...*/
+}
+
+.colorSelectorDlg-selector-container {
+  width  : 725px;
+  height : 225px;
+}
+
+.colorSelectorDlg-selector-custom-container {
+  width : 350px;
+}
