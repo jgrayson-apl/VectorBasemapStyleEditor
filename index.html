@@ -46,6 +46,8 @@
         "dijit/layout/TabContainer",
         "dijit/layout/ContentPane",
         "dijit/ConfirmDialog",
+        "dijit/Toolbar",
+        "dijit/form/Button",
         "dijit/form/CheckBox",
         "dijit/form/Select",
         "dojox/form/CheckedMultiSelect"
@@ -55,7 +57,7 @@
 
         var myTemplate = new Template(templateConfig);
         myTemplate.startup().then(function (config) {
-          ready(lang.hitch(this, function (evt) {
+          ready(lang.hitch(this, function () {
             var myApp = new Main(config);
             myApp.startup();
           }));
@@ -101,7 +103,7 @@
           <div id="map-node" dir="ltr">
             <div id="home-button-node"></div>
             <div id="search-node"></div>
-            <div id="zoom-node" class="dijitHidden">Level: 1</div>
+            <div id="zoom-node" class="dijitHidden">Zoom: 1</div>
             <div id="eye-tool-node" class="dijitHidden">
               <div id="eye-tool" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="label:'Pick Color',iconClass:'dijitCheckBoxIcon'"></div>
             </div>

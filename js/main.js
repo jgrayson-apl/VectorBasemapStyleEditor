@@ -121,7 +121,6 @@ define([
      */
     constructor: function (config) {
       declare.safeMixin(this, config);
-
       // PRESERVE DRAWING BUFFER SO WE CAN GET TO THE PIXELS //
       vectorTile.Renderer.prototype.options.preserveDrawingBuffer = true;
     },
@@ -148,6 +147,20 @@ define([
             window.location.protocol = "https:";
             window.location.reload();
           }
+
+          // WELCOME DIALOG CONTENT //
+          var welcomeContent = put("ul.welcome-content");
+          put(welcomeContent, "li", "Always make a backup copy of the item before using this app");
+          put(welcomeContent, "li", "The user experience is focused on color replacement");
+          put(welcomeContent, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
+          // WELCOME DIALOG //
+          var welcomeDlg = new ConfirmDialog({
+            title: "Vector Basemap Style Editor",
+            closable: false,
+            content: welcomeContent
+          });
+          domClass.add(welcomeDlg.cancelButton.domNode, "dijitHidden");
+          welcomeDlg.show();
 
           // SET PORTAL USER //
           this.portalUser = loggedInUser;
@@ -209,7 +222,6 @@ define([
 
       // =========================================================================================== //
 
-
       // ITEM LIST //
       this.userBasemapsItemsList = new (declare([OnDemandGrid, Selection, DijitRegistry]))({
         bufferRows: 300,
@@ -228,8 +240,8 @@ define([
               var detailsNode = put(titleNode, "span.basemap-item-action", "details");
               on(detailsNode, "click", lang.hitch(this, function (evt) {
                 evt.stopPropagation();
-                var detailsUrlTemplate = (item.owner === this.portalUser.username) ? "{0}//{1}.{2}/home/item.html?id={3}" : "{0}//www.arcgis.com/home/item.html?id={3}";
-                var agsDetailsUrl = lang.replace(detailsUrlTemplate, [document.location.protocol, this.portalUser.portal.urlKey, this.portalUser.portal.customBaseUrl, item.id]);
+                var detailsUrlTemplate = (item.owner === this.portalUser.username) ? "{0}//{1}.{2}/home/item.html?id={4}" : "{0}//{3}/home/item.html?id={4}";
+                var agsDetailsUrl = lang.replace(detailsUrlTemplate, [document.location.protocol, this.portalUser.portal.urlKey, this.portalUser.portal.customBaseUrl, this.portalUser.portal.portalHostname, item.id]);
                 window.open(agsDetailsUrl);
               }));
 
@@ -582,159 +594,165 @@ define([
      */
     initializeCopyDefaultEsriItem: function () {
 
-      // ESRI VECTOR BASEMAPS GROUP  //
-      //  - http://www.arcgis.com/home/group.html?id=30de8da907d240a0bccd5ad3ff25ef4a&focus=layers
-      var itemQuery = 'group:30de8da907d240a0bccd5ad3ff25ef4a AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
+      // ARCGIS.COM //
+      if(this.portal.portalName === "ArcGIS Online") {
 
-      // GET ESRI VECTOR TILE SERVICE ITEMS //
-      this.portalUser.portal.queryItems({
-        q: lang.replace(itemQuery, this.portalUser)
-      }).then(lang.hitch(this, function (queryResponse) {
-        // ESRI BASEMAPS ITEM STORE //
-        this.esriBasemapsItemsStore = new Observable(new Memory({data: queryResponse.results}));
-        registry.byId("create-copy-btn").set("disabled", false);
-      }));
+        // ESRI VECTOR BASEMAPS GROUP  //
+        //  - http://www.arcgis.com/home/group.html?id=30de8da907d240a0bccd5ad3ff25ef4a&focus=layers
+        var itemQuery = 'group:30de8da907d240a0bccd5ad3ff25ef4a AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
 
-      // CREATE COPY BUTTON CLICK //
-      registry.byId("create-copy-btn").on("click", lang.hitch(this, function () {
-
-        // CREATE BASEMAP COPY DIALOG //
-        var createCopyDlg = new ConfirmDialog({title: "Copy Esri Vector Basemap Item"});
-        createCopyDlg.okButton.set("disabled", true);
-        createCopyDlg.show();
-
-        // NEW ITEM TITLE //
-        var itemTitleNode = put(createCopyDlg.actionBarNode, "div.item-title");
-        put(itemTitleNode, "label", "New Title: ");
-        var itemTitleInput = new ValidationTextBox({
-          required: true,
-          invalidMessage: "Item with this title already exists...",
-          validator: lang.hitch(this, function (value, constraints) {
-            var isValidTitle = value ? (this.userBasemapsItemsStore.query({title: value}).total === 0) : false;
-            createCopyDlg.okButton.set("disabled", !isValidTitle);
-            return isValidTitle;
-          })
-        }, put(itemTitleNode, "div"));
-
-        // DIALOG CONTENT //
-        var dialogContent = put(createCopyDlg.containerNode, "div.dialog-content");
-
-        // ESRI VECTOR BASEMAP LIST //
-        this.esriBasemapItemList = new (declare([OnDemandList, Selection, DijitRegistry]))({
-          store: this.esriBasemapsItemsStore,
-          sort: "title",
-          selectionMode: "single",
-          renderRow: lang.hitch(this, function (item) {
-            var basemapNode = put("div.basemap-node");
-            put(basemapNode, "div.basemap-title-node", item.title);
-            put(basemapNode, "img.basemap-thumb-node", {src: item.thumbnailUrl});
-            put(basemapNode, "div.basemap-snippet-node", item.snippet);
-            //put(basemapNode, "fieldset.basemap-description-node", {legend: 'Description', innerHTML: item.description});
-            return basemapNode;
-          })
-        }, put(dialogContent, "div"));
-        this.esriBasemapItemList.startup();
-        // BASEMAP SELECTED //
-        this.esriBasemapItemList.on("dgrid-select", lang.hitch(this, function (evt) {
-          createCopyDlg.selectedItem = evt.rows[0].data;
-          itemTitleInput.set("value", this.suggestTitle(createCopyDlg.selectedItem.title));
-        }));
-        this.esriBasemapItemList.on("dgrid-deselect", lang.hitch(this, function (evt) {
-          createCopyDlg.selectedItem = null;
-          itemTitleInput.set("value", null);
+        // GET ESRI VECTOR TILE SERVICE ITEMS //
+        this.portalUser.portal.queryItems({
+          q: lang.replace(itemQuery, this.portalUser)
+        }).then(lang.hitch(this, function (queryResponse) {
+          // ESRI BASEMAPS ITEM STORE //
+          this.esriBasemapsItemsStore = new Observable(new Memory({data: queryResponse.results}));
+          registry.byId("create-copy-btn").set("disabled", false);
         }));
 
-        // SUGGEST VALID ITEM TITLE //
-        this.suggestTitle = lang.hitch(this, function (initialTitle) {
-          var copyCount = 1;
-          var newTitle = initialTitle + " - Copy";
-          while (this.userBasemapsItemsStore.query({title: newTitle}).total > 0) {
-            newTitle = initialTitle + " - Copy" + (++copyCount);
-          }
-          return newTitle;
-        });
+        // CREATE COPY BUTTON CLICK //
+        registry.byId("create-copy-btn").on("click", lang.hitch(this, function () {
 
-        // OK BUTTON CLICK //
-        createCopyDlg.on("execute", lang.hitch(this, function () {
-          if(createCopyDlg.selectedItem) {
-            // ITEM TO COPY //
-            var copyItem = createCopyDlg.selectedItem;
+          // CREATE BASEMAP COPY DIALOG //
+          var createCopyDlg = new ConfirmDialog({title: "Copy Esri Vector Basemap Item"});
+          createCopyDlg.okButton.set("disabled", true);
+          createCopyDlg.show();
 
-            // EXTENT //
-            var extentText = lang.replace("{0},{1},{2},{3}", [copyItem.extent[0][0], copyItem.extent[0][1], copyItem.extent[1][0], copyItem.extent[1][1]]);
+          // NEW ITEM TITLE //
+          var itemTitleNode = put(createCopyDlg.actionBarNode, "div.item-title");
+          put(itemTitleNode, "label", "New Title: ");
+          var itemTitleInput = new ValidationTextBox({
+            required: true,
+            invalidMessage: "Item with this title already exists...",
+            validator: lang.hitch(this, function (value, constraints) {
+              var isValidTitle = value ? (this.userBasemapsItemsStore.query({title: value}).total === 0) : false;
+              createCopyDlg.okButton.set("disabled", !isValidTitle);
+              return isValidTitle;
+            })
+          }, put(itemTitleNode, "div"));
 
-            // ADD ITEM //
-            esriRequest({
-              url: lang.replace("{userContentUrl}/addItem", this.portalUser),
-              content: {
-                f: "json",
-                type: "Vector Tile Service",
-                originItemId: copyItem.id,
-                relationshipType: "Style2Style",
-                url: copyItem.url,
-                title: itemTitleInput.get("value"),
-                snippet: copyItem.snippet,
-                description: copyItem.description,
-                tags: copyItem.tags.join(","),
-                extent: extentText,
-                thumbnailUrl: copyItem.thumbnailUrl
-              }
-            }).then(lang.hitch(this, function (addItemResponse) {
-              if(addItemResponse.success) {
+          // DIALOG CONTENT //
+          var dialogContent = put(createCopyDlg.containerNode, "div.dialog-content");
 
-                // GET COPY ITEM STYLE //
-                var copyStyleRootUrl = lang.replace("{itemUrl}/resources/styles/root.json", copyItem);
-                esriRequest({
-                  url: copyStyleRootUrl,
-                  content: {f: "json"}
-                }).then(lang.hitch(this, function (copyStyle) {
+          // ESRI VECTOR BASEMAP LIST //
+          this.esriBasemapItemList = new (declare([OnDemandList, Selection, DijitRegistry]))({
+            store: this.esriBasemapsItemsStore,
+            sort: "title",
+            selectionMode: "single",
+            renderRow: lang.hitch(this, function (item) {
+              var basemapNode = put("div.basemap-node");
+              put(basemapNode, "div.basemap-title-node", item.title);
+              put(basemapNode, "img.basemap-thumb-node", {src: item.thumbnailUrl});
+              put(basemapNode, "div.basemap-snippet-node", item.snippet);
+              //put(basemapNode, "fieldset.basemap-description-node", {legend: 'Description', innerHTML: item.description});
+              return basemapNode;
+            })
+          }, put(dialogContent, "div"));
+          this.esriBasemapItemList.startup();
+          // BASEMAP SELECTED //
+          this.esriBasemapItemList.on("dgrid-select", lang.hitch(this, function (evt) {
+            createCopyDlg.selectedItem = evt.rows[0].data;
+            itemTitleInput.set("value", this.suggestTitle(createCopyDlg.selectedItem.title));
+          }));
+          this.esriBasemapItemList.on("dgrid-deselect", lang.hitch(this, function (evt) {
+            createCopyDlg.selectedItem = null;
+            itemTitleInput.set("value", null);
+          }));
 
-                  // UPDATE STYLE TO USE USE GLYPHS AND SPRITES FROM COPY BASEMAP ITEM //
-                  var newStyle = lang.mixin({}, copyStyle, {
-                    glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", {item: copyItem, style: copyStyle}),
-                    sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", {item: copyItem, style: copyStyle})
-                  });
+          // SUGGEST VALID ITEM TITLE //
+          this.suggestTitle = lang.hitch(this, function (initialTitle) {
+            var copyCount = 1;
+            var newTitle = initialTitle + " - Copy";
+            while (this.userBasemapsItemsStore.query({title: newTitle}).total > 0) {
+              newTitle = initialTitle + " - Copy" + (++copyCount);
+            }
+            return newTitle;
+          });
 
-                  // URL INFO //
-                  var urlInfo = {
-                    userContentUrl: this.portalUser.userContentUrl,
-                    itemsFolder: (addItemResponse.folder) ? addItemResponse.folder + "/items" : "items",
-                    itemId: addItemResponse.id
-                  };
+          // OK BUTTON CLICK //
+          createCopyDlg.on("execute", lang.hitch(this, function () {
+            if(createCopyDlg.selectedItem) {
+              // ITEM TO COPY //
+              var copyItem = createCopyDlg.selectedItem;
 
-                  // ADD STYLE RESOURCE //
+              // EXTENT //
+              var extentText = lang.replace("{0},{1},{2},{3}", [copyItem.extent[0][0], copyItem.extent[0][1], copyItem.extent[1][0], copyItem.extent[1][1]]);
+
+              // ADD ITEM //
+              esriRequest({
+                url: lang.replace("{userContentUrl}/addItem", this.portalUser),
+                content: {
+                  f: "json",
+                  type: "Vector Tile Service",
+                  originItemId: copyItem.id,
+                  relationshipType: "Style2Style",
+                  url: copyItem.url,
+                  title: itemTitleInput.get("value"),
+                  snippet: copyItem.snippet,
+                  description: copyItem.description,
+                  tags: copyItem.tags.join(","),
+                  extent: extentText,
+                  thumbnailUrl: copyItem.thumbnailUrl
+                }
+              }).then(lang.hitch(this, function (addItemResponse) {
+                if(addItemResponse.success) {
+
+                  // GET COPY ITEM STYLE //
+                  var copyStyleRootUrl = lang.replace("{itemUrl}/resources/styles/root.json", copyItem);
                   esriRequest({
-                    url: lang.replace("{userContentUrl}/{itemsFolder}/{itemId}/addResources", urlInfo),
-                    content: {
-                      f: "json",
-                      resourcesPrefix: "styles",
-                      filename: "root.json",
-                      text: json.stringify(newStyle)
-                    }
-                  }, {usePost: true}).then(lang.hitch(this, function (addResourcesResponse) {
-                    if(addResourcesResponse.success) {
-                      alert("Esri Vector Basemap copied...");
+                    url: copyStyleRootUrl,
+                    content: {f: "json"}
+                  }).then(lang.hitch(this, function (copyStyle) {
 
-                      // GET NEW BASEMAP ITEM //
-                      this.portalUser.getItem(addItemResponse.id).then(lang.hitch(this, function (newBasemapItem) {
-                        this.userBasemapsItemsStore.add(newBasemapItem);
-                      }), console.warn);
+                    // UPDATE STYLE TO USE USE GLYPHS AND SPRITES FROM COPY BASEMAP ITEM //
+                    var newStyle = lang.mixin({}, copyStyle, {
+                      glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", {item: copyItem, style: copyStyle}),
+                      sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", {item: copyItem, style: copyStyle})
+                    });
 
-                    } else {
-                      alert("Unable to copy Esri Basemap");
-                      console.warn("Unable to copy Esri Basemap: ", addResourcesResponse);
-                    }
+                    // URL INFO //
+                    var urlInfo = {
+                      userContentUrl: this.portalUser.userContentUrl,
+                      itemsFolder: (addItemResponse.folder) ? addItemResponse.folder + "/items" : "items",
+                      itemId: addItemResponse.id
+                    };
+
+                    // ADD STYLE RESOURCE //
+                    esriRequest({
+                      url: lang.replace("{userContentUrl}/{itemsFolder}/{itemId}/addResources", urlInfo),
+                      content: {
+                        f: "json",
+                        resourcesPrefix: "styles",
+                        filename: "root.json",
+                        text: json.stringify(newStyle)
+                      }
+                    }, {usePost: true}).then(lang.hitch(this, function (addResourcesResponse) {
+                      if(addResourcesResponse.success) {
+                        alert("Esri Vector Basemap copied...");
+
+                        // GET NEW BASEMAP ITEM //
+                        this.portalUser.getItem(addItemResponse.id).then(lang.hitch(this, function (newBasemapItem) {
+                          this.userBasemapsItemsStore.add(newBasemapItem);
+                        }), console.warn);
+
+                      } else {
+                        alert("Unable to copy Esri Basemap");
+                        console.warn("Unable to copy Esri Basemap: ", addResourcesResponse);
+                      }
+                    }));
+
                   }));
-
-                }));
-              } else {
-                console.warn("Unable to add new Basemap item: ", addItemResponse);
-              }
-            }));
-          }
+                } else {
+                  console.warn("Unable to add new Basemap item: ", addItemResponse);
+                }
+              }));
+            }
+          }));
         }));
-      }));
-
+      } else {
+        // NOT ARCGIS.COM //
+        registry.byId("create-copy-btn").set("disabled", true);
+      }
     },
 
     /**
@@ -756,7 +774,6 @@ define([
       }
       return deferred.promise;
     },
-
 
     /**
      *
@@ -783,7 +800,7 @@ define([
 
           // MAP ZOOM-END EVENT //
           this.map.on("zoom-end", lang.hitch(this, function (evt) {
-            dom.byId("zoom-node").innerHTML = lang.replace("Level: {level}", evt);
+            dom.byId("zoom-node").innerHTML = lang.replace("Zoom: {level}", evt);
             if(this.styleLayersList && registry.byId("current-zoom-chk").get("checked")) {
               this.styleLayersList.refresh();
             }
@@ -861,12 +878,6 @@ define([
 
     /**
      * SEARCH
-     *
-     * https://developers.arcgis.com/javascript/jsapi/search-amd.html
-     * https://developers.arcgis.com/rest/geocode/api-reference/geocoding-category-filtering.htm
-     *
-     * https://developers.arcgis.com/rest/geocode/api-reference/geocode-coverage.htm
-     *
      */
     initSearch: function () {
 
@@ -897,13 +908,6 @@ define([
 
       // MOUSE MOVE //
       this.eyeTool.mapClickHandle = on.pausable(this.map, "click", lang.hitch(this, function (evt) {
-        //console.info(this.vectorBasemapLayer.gl);
-
-        // https://github.com/mapbox/mapbox-gl-js/blob/b7032636206448e16eb681836f97e79f0587fd7e/docs/_posts/examples/3400-01-05-featuresat.html
-        //this.vectorBasemapLayer.gl.featuresAt([evt.screenPoint.x, evt.screenPoint.y, 0], {radius: 5}, lang.hitch(this, function (err, features) {
-        //  if(err) throw err;
-        //  console.info(json.stringify(features, null, 2));
-        //}));
 
         var glContext = this.vectorBasemapLayer.gl.painter.gl;
         var pixelValues = new Uint8Array(4);
@@ -914,15 +918,6 @@ define([
         this._updateColorNode(this.replaceSourceColorNode, screenColorHex);
         this.setColorSearch(screenColorHex);
 
-
-        /*
-         window.showThumbnail = function() {
-         var dataURL = vtlayer.gl.getCanvas().toDataURL();
-         var img = document.getElementById("imgThumbnail");
-         img.src = dataURL;
-         };
-         */
-
       }));
       this.eyeTool.mapClickHandle.pause();
 
@@ -931,29 +926,6 @@ define([
         if(checked && this.vectorBasemapLayer) {
           this.map.setMapCursor("crosshair");
           this.eyeTool.mapClickHandle.resume();
-
-          /* var scaleFactor = 2.5;
-           var scaledImage = put("img", {
-           style: lang.replace("width:{w}px;height:{h}px;", {w: this.map.width * scaleFactor, h: this.map.height * scaleFactor}),
-           src: this.vectorBasemapLayer.gl.getCanvas().toDataURL()
-           });
-           on(scaledImage, "mousemove", lang.hitch(this, function (evt) {
-           var glContext = this.vectorBasemapLayer.gl.painter.gl;
-           var pixelValues = new Uint8Array(4);
-           glContext.readPixels(evt.clientX, (this.map.height - evt.clientY), 1, 1, glContext.RGBA, glContext.UNSIGNED_BYTE, pixelValues);
-           var screenColor = new Color([pixelValues[0], pixelValues[1], pixelValues[2], pixelValues[3] / 255]);
-           var screenColorHex = screenColor.toHex().toUpperCase();
-
-           selectedColorPane.innerHTML = screenColorHex;
-           domStyle.set(selectedColorPane, "background-color", screenColorHex);
-           }));
-           var colorPickerDlg = new ConfirmDialog({
-           title: "Pick Color",
-           content: scaledImage
-           });
-           var selectedColorPane = put(colorPickerDlg.actionBarNode, "div.selected-color-pane", {style: "width:300px;height:30px;"});
-           colorPickerDlg.show();*/
-
         } else {
           this.map.setMapCursor("default");
           this.eyeTool.mapClickHandle.pause();
@@ -1001,22 +973,6 @@ define([
           renderCell: lang.hitch(this, function (item, value, node, options) {
             // VISIBILITY CHECKBOX //
             var visCheckBox = new CheckBox({checked: value});
-
-            //visCheckBox.on("click", lang.hitch(this, function (evt) {
-            //  if(evt.ctrlKey) {
-            //    evt.stopPropagation();
-            //
-            //    var isChecked = visCheckBox.get("checked");
-            //    var searchItems = this.styleLayersStore.query(this.styleLayersList.query);
-            //    var visibilityUpdates = array.map(searchItems, lang.hitch(this, function (otherItem) {
-            //      return this._updateItemVisibility(otherItem, isChecked);
-            //    }));
-            //    all(visibilityUpdates).then(lang.hitch(this, function () {
-            //      this.applyBasemapStyle("Batch Visibility Update");
-            //    }), console.warn);
-            //  }
-            //}));
-
             visCheckBox.on("change", lang.hitch(this, function (isChecked) {
               this._updateItemVisibility(item, isChecked).then(lang.hitch(this, function () {
                 this.applyBasemapStyle("Visibility Update");
@@ -1405,73 +1361,11 @@ define([
 
       this.styleLayerEditorDialogExecutteHandle = on.once(this.styleLayerEditorDialog, "execute", lang.hitch(this, function () {
         var updatedItem = this.jsonEditor.get();
-
-        /*
-         var originalItemStr = json.stringify(item);
-         var updatedItemStr = json.stringify(updatedItem);
-         var diff = this.getDifference(originalItemStr, updatedItemStr);
-         if(diff.type === "replace") {
-         var oldStr = originalItemStr.substr(diff.start, diff.removed);
-         var newStr = updatedItemStr.substr(diff.start, diff.added);
-         console.info(diff.type, oldStr, newStr)
-         }
-         */
-
         this.styleLayersStore.put(updatedItem);
         this.applyBasemapStyle("Style JSON Edit");
       }));
 
     },
-
-    /**
-     * http://stackoverflow.com/questions/26857423/detecting-difference-between-strings-in-javascript
-     *
-     * @param oldText
-     * @param newText
-     * @returns {{type: *, start: number, removed: number, added: number}}
-     */
-    /*
-     getDifference: function (oldText, newText) {
-
-     // Find the index at which the change began
-     var s = 0;
-     while (s < oldText.length && s < newText.length && oldText[s] == newText[s]) {
-     s++;
-     }
-
-     // Find the index at which the change ended (relative to the end of the string)
-     var e = 0;
-     while (e < oldText.length && e < newText.length && oldText.length - e > s && newText.length - e > s && oldText[oldText.length - 1 - e] == newText[newText.length - 1 - e]) {
-     e++;
-     }
-
-     // The change end of the new string (ne) and old string (oe)
-     var ne = newText.length - e;
-     var oe = oldText.length - e;
-
-     // The number of chars removed and added
-     var removed = oe - s;
-     var added = ne - s;
-
-     var type;
-     switch (true) {
-     case removed == 0 && added > 0:  // It's an 'add' if none were removed and at least 1 added
-     type = 'add';
-     break;
-     case removed > 0 && added == 0:  // It's a 'remove' if none were added and at least one removed
-     type = 'remove';
-     break;
-     case removed > 0 && added > 0:   // It's a replace if there were both added and removed characters
-     type = 'replace';
-     break;
-     default:
-     type = 'none';                 // Otherwise there was no change
-     s = 0;
-     }
-
-     return {type: type, start: s, removed: removed, added: added};
-     },
-     */
 
     /**
      *
