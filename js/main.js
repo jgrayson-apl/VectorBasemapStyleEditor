@@ -81,8 +81,8 @@ define([
     // ZOOM RANGE //
     zoomRange: {
       min: 0,
-      max: 20,
-      count: 21
+      max: 18,
+      count: 19
     },
 
     // STYLE LAYER TYPES //
@@ -155,7 +155,7 @@ define([
           put(welcomeContent, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
           // WELCOME DIALOG //
           var welcomeDlg = new ConfirmDialog({
-            title: "Vector Basemap Style Editor",
+            title: MainApp.appName,
             closable: false,
             content: welcomeContent
           });
@@ -1486,6 +1486,7 @@ define([
     });
   };
 
+  MainApp.appName = "Vector Basemap Style Editor";
   MainApp.version = "0.1.0";
 
   return MainApp;
@@ -1494,6 +1495,7 @@ define([
 
 /*
  - From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
+ - Does new Color(?) correctly work for all these?
  {
  "line-color": "#ff0",
  "line-color": "#ffff00",
