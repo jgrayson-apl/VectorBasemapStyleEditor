@@ -273,7 +273,7 @@ define([
 
     /**
      * SET VARIATIONS COLORS
-     *  - http://www.w3schools.com/tags/ref_colorpicker.asp
+     *  - Adapted from http://www.w3schools.com/tags/ref_colorpicker.asp
      *
      * @param sourceColor
      * @private

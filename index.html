@@ -79,6 +79,8 @@
                 <a href="https://www.mapbox.com/mapbox-gl-style-spec/" target="_blank">Style Reference</a>
                 <span>|</span>
                 <a href="https://github.com/jgrayson-apl/VectorBasemapStyleEditor" target="_blank">GitHub</a>
+                <span>|</span>
+                <a href="./resources/VectorBasemapStyleEditor_004/VectorBasemapStyleEditor_004.html" target="_blank">Show Me</a>
               </span>
             </td>
           </tr>
@@ -92,7 +94,8 @@
             <div id="update-btn-node">
               <div id="undo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Undo'">&#x21b6;</div>
               <div id="redo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Redo'">&#x21b7;</div>
-              <div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Basemap Item',disabled:true"></div>
+              <!--<div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Basemap Item',disabled:true"></div>-->
+              <div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Item',disabled:true"></div>
             </div>
           </div>
           <div id="main-left-top-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
@@ -117,13 +120,14 @@
             <span id="select-all-filter" class="select-node dijitHidden" title="Display ALL"></span>
             <span id="select-none-filter" class="select-node dijitHidden" title="Display NONE"></span>
             <span data-dojo-type="dijit/ToolbarSeparator" class="dijitHidden"></span>
-            <label for="current-zoom-chk" class="search-label">Current map zoom level:</label>
+            <!--<label for="current-zoom-chk" class="search-label">Current map zoom level:</label>-->
+            <label for="current-zoom-chk" class="search-label">Current zoom:</label>
             <div id="current-zoom-chk" data-dojo-type="dijit/form/CheckBox" data-dojo-props="checked:false"></div>
             <span data-dojo-type="dijit/ToolbarSeparator"></span>
             <label for="filter-input" class="search-label">Search:</label>
-            <div id="filter-input" data-dojo-type="dijit/form/TextBox" data-dojo-props="intermediateChanges:true,placeHolder:'enter filter here',style:{width:'300px'}"></div>
+            <div id="filter-input" data-dojo-type="dijit/form/TextBox" data-dojo-props="intermediateChanges:true,placeHolder:'enter filter here',style:{width:'200px'}"></div>
             <!--<span data-dojo-type="dijit/ToolbarSeparator"></span>-->
-            <span class="search-label">OR source-layer:</span>
+            <span class="search-label">source-layer:</span>
             <span id="source-layer-combo"></span>
           </div>
           <div id="full-list-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">

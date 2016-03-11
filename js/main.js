@@ -66,9 +66,6 @@ define([
              HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
 
-  // STYLE LAYER LIST //
-  var StyleLayersList = declare([OnDemandGrid, Selection, editor, DijitRegistry], {keepScrollPosition: true});
-
   /**
    * MAIN APPLICATION
    */
@@ -270,6 +267,11 @@ define([
 
       // =========================================================================================== //
 
+      // STYLE LAYER LIST //
+      var StyleLayersList = declare([OnDemandGrid, Selection, editor, DijitRegistry], {keepScrollPosition: true});
+
+      // =========================================================================================== //
+
 
       // FILTER TEXTBOX //
       this.filterInput = registry.byId("filter-input");
@@ -280,7 +282,7 @@ define([
 
       // SOURCE-LAYER COMBOBOX FILTER //
       this.sourceLayerList = new UniqueComboBox({
-        style: "width:300px;",
+        style: "width:200px;",
         placeHolder: 'select source-layer',
         searchAttr: "source-layer",
         intermediateChanges: true,
@@ -500,6 +502,12 @@ define([
       registry.byId("redo-btn").on("click", lang.hitch(this.undoManager, this.undoManager.redo));
 
       registry.byId("undo-btn").on("mouseover", lang.hitch(this, function () {
+        /*
+         var undoStackInfos = array.map(this.undoManager._historyStack, lang.hitch(this, function (stackItem) {
+         return stackItem.label;
+         }));
+         registry.byId("undo-btn").set("title", undoStackInfos.join("\n"));
+         */
         registry.byId("undo-btn").set("title", "Undo " + (this.undoManager.canUndo ? this.undoManager.peekUndo().label : ""));
       }));
       registry.byId("redo-btn").on("mouseover", lang.hitch(this, function () {
@@ -1495,7 +1503,7 @@ define([
 
 /*
  - From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
- - Does new Color(?) correctly work for all these?
+ - TODO: Does new dojo/_base/Color(...) work correctly for all these?
  {
  "line-color": "#ff0",
  "line-color": "#ffff00",
