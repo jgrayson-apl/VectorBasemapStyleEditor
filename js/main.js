@@ -65,6 +65,31 @@ define([
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, UniqueComboBox,
              HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
+  /**
+   * TODO: USE dojo/_base/Color(...) FROM THE VERY START FOR ALL COLOR ISSUES INSTEAD OF ASSUMING HEX VALUES...
+   *
+   *   From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
+   *   TODO: Does dojo/_base/Color(...) work correctly for all these?
+   *
+   *       "#ff0"
+   *       "#ffff00"
+   *       "rgb(255, 255, 0)"
+   *       "rgba(255, 255, 0, 1)"
+   *       "hsl(100, 50%, 50%)"
+   *       "hsla(100, 50%, 50%, 1)"
+   *       "yellow"
+   *
+   *       background-color
+   *       fill-color
+   *       fill-outline-color
+   *       line-color
+   *       icon-color
+   *       icon-halo-color
+   *       text-color
+   *       text-halo-color
+   *       circle-color
+   */
+
 
   /**
    * MAIN APPLICATION
@@ -78,8 +103,8 @@ define([
     // ZOOM RANGE //
     zoomRange: {
       min: 0,
-      max: 18,
-      count: 19
+      max: 20,
+      count: 21
     },
 
     // STYLE LAYER TYPES //
@@ -118,7 +143,7 @@ define([
      */
     constructor: function (config) {
       declare.safeMixin(this, config);
-      // PRESERVE DRAWING BUFFER SO WE CAN GET TO THE PIXELS //
+      // PRESERVE DRAWING BUFFER SO WE CAN GET TO THE PIXELS WHEN USING THE PICK COLOR MAP TOOL //
       vectorTile.Renderer.prototype.options.preserveDrawingBuffer = true;
     },
 
@@ -150,6 +175,8 @@ define([
           put(welcomeContent, "li", "Always make a backup copy of the item before using this app");
           put(welcomeContent, "li", "The user experience is focused on color replacement");
           put(welcomeContent, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
+          put(welcomeContent, "li", "Edit style json directly by clicking on 'id' cell. Warning: use caution!");
+
           // WELCOME DIALOG //
           var welcomeDlg = new ConfirmDialog({
             title: MainApp.appName,
@@ -190,7 +217,7 @@ define([
           this.initializeUndoManager();
 
           // SAVE BASEMAP STYLE //
-          registry.byId("update-btn").on("click", lang.hitch(this, this.updateBasemapStyle));
+          registry.byId("update-btn").on("click", lang.hitch(this, this.saveStyleChangesToUserItem));
 
           // CLEAR DISPLAY MESSAGE //
           MainApp.displayMessage();
@@ -200,7 +227,7 @@ define([
     },
 
     /**
-     *
+     * UPDATE USER INFORMATION - FULL NAME AND THUMBNAIL
      */
     updateUserInfo: function () {
       var portalUserNode = dom.byId("portaluser-section");
@@ -212,7 +239,7 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE THE VARIOUS GRIDS AND LISTS USED IN THE APP
      */
     initializeGrids: function () {
 
@@ -359,6 +386,7 @@ define([
     },
 
     /**
+     * UPDATE ITEM VISIBILITY BASED ON LIST QUERY
      *
      * @param isVisible
      * @private
@@ -376,6 +404,7 @@ define([
     },
 
     /**
+     * EDIT STYLE JSON DIRECTLY
      *
      * @param list
      * @param evt
@@ -389,7 +418,7 @@ define([
     },
 
     /**
-     *
+     *  CREATE STYLE LAYER TYPE STORE AND LIST
      */
     initStyleLayerTypesSelect: function () {
 
@@ -408,7 +437,7 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE FIND AND REPLACE
      */
     initializeFindReplace: function () {
 
@@ -458,8 +487,8 @@ define([
 
     },
 
-
     /**
+     * UPDATE ITEM
      *
      * @param noSelection
      * @param item
@@ -488,19 +517,23 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE UNDO MANAGER
      */
     initializeUndoManager: function () {
 
+      // UNDO MANAGER //
       this.undoManager = new UndoManager({maxOperations: 100});
+      // UNDO MANAGER EVENT //
       this.undoManager.on("change", lang.hitch(this, function (evt) {
         registry.byId("undo-btn").set("disabled", !this.undoManager.canUndo);
         registry.byId("redo-btn").set("disabled", !this.undoManager.canRedo);
       }));
 
+      // UNDO/REDO BUTTON CLICKS //
       registry.byId("undo-btn").on("click", lang.hitch(this.undoManager, this.undoManager.undo));
       registry.byId("redo-btn").on("click", lang.hitch(this.undoManager, this.undoManager.redo));
 
+      // MOUSE OVER UNDO BUTTON //
       registry.byId("undo-btn").on("mouseover", lang.hitch(this, function () {
         /*
          var undoStackInfos = array.map(this.undoManager._historyStack, lang.hitch(this, function (stackItem) {
@@ -510,6 +543,8 @@ define([
          */
         registry.byId("undo-btn").set("title", "Undo " + (this.undoManager.canUndo ? this.undoManager.peekUndo().label : ""));
       }));
+
+      // MOUSE OVER REDO BUTTON //
       registry.byId("redo-btn").on("mouseover", lang.hitch(this, function () {
         registry.byId("redo-btn").set("title", "Redo " + (this.undoManager.canRedo ? this.undoManager.peekRedo().label : ""));
       }));
@@ -517,7 +552,7 @@ define([
     },
 
     /**
-     *
+     * INITIALE COLOR SELECTION DIALOG //
      */
     initializeColorSelectDialog: function () {
       if(!this.colorSelectorDialog) {
@@ -526,6 +561,7 @@ define([
     },
 
     /**
+     * USE COLOR SELECTION DIALOG TO GET NEW COLOR
      *
      * @param sourceColor
      * @param targetColor
@@ -544,6 +580,8 @@ define([
     },
 
     /**
+     *  INITIALIZE JSON EDITOR
+     *
      *  https://github.com/josdejong/jsoneditor/
      */
     initializeJsonEditor: function () {
@@ -571,7 +609,7 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE USER VECTOR TILE SERVICE ITEM LIST
      */
     initializeBasemapItemList: function () {
 
@@ -598,7 +636,7 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE ABILITY TO COPY DEFAULT ESRI BASEMAP ITEM
      */
     initializeCopyDefaultEsriItem: function () {
 
@@ -706,9 +744,8 @@ define([
                 if(addItemResponse.success) {
 
                   // GET COPY ITEM STYLE //
-                  var copyStyleRootUrl = lang.replace("{itemUrl}/resources/styles/root.json", copyItem);
                   esriRequest({
-                    url: copyStyleRootUrl,
+                    url: lang.replace("{itemUrl}/resources/styles/root.json", copyItem),
                     content: {f: "json"}
                   }).then(lang.hitch(this, function (copyStyle) {
 
@@ -764,6 +801,7 @@ define([
     },
 
     /**
+     * GET USER ITEM - MAKE SURE WE GET ITEM DIRECTLY FROM PORTAL USER INSTEAD OF SEARCH
      *
      * @param item
      * @returns {*}
@@ -784,6 +822,7 @@ define([
     },
 
     /**
+     * USER VECTOR TILE SERVICE ITEM SELECTED
      *
      * @param item
      */
@@ -797,7 +836,7 @@ define([
 
         // DISPLAY VECTOR BASEMAP //
         if(!this.map) {
-          // CREATE MAP //
+          // ONLY CREATE MAP ONCE //
           this.map = new Map("map-node", {
             sliderOrientation: "horizontal",
             zoom: 1
@@ -840,6 +879,8 @@ define([
         }).then(lang.hitch(this, function (style) {
 
           // VECTOR BASEMAP LAYER //
+          // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
+          //   HERE WE PASS IN THE STYLE DIRECTLY INTO THE CONSTRUCTOR
           this.vectorBasemapLayer = new VectorTileLayer(this._cloneStyle(style));
           this.vectorBasemapLayer.on("error", lang.hitch(this, function (evt) {
             console.warn("vectorBasemapLayer.error: ", evt.error);
@@ -871,6 +912,8 @@ define([
     },
 
     /**
+     * CLONE A STYLE
+     * - REMOVE _ssl PROPERTY FROM CLONE
      *
      * @param style
      * @returns {*}
@@ -885,7 +928,7 @@ define([
     },
 
     /**
-     * SEARCH
+     * INITIALIZE SEARCH WIDGET
      */
     initSearch: function () {
 
@@ -904,7 +947,8 @@ define([
     },
 
     /**
-     *
+     * INITIALIZE COLOR PICKER MAP TOOL
+     * - SEE CONSTRUCTOR FOR ADDITIONAL DETAILS...
      */
     initializeEyeTool: function () {
 
@@ -943,6 +987,7 @@ define([
     },
 
     /**
+     * UPDATE ITEM VISIBILITY
      *
      * @param item
      * @param isVisible
@@ -963,10 +1008,11 @@ define([
     },
 
     /**
-     *
+     * DEFINE GRID COLUMNS FOR STYLE OBJECTS
      */
     getStyleColumns: function (displayAllColumns) {
 
+      // SOURCE RELATED COLUMNS //
       var sourceColumns = [
         {
           label: "vis",
@@ -996,6 +1042,7 @@ define([
         }
       ];
 
+      // ITEM RELATED COLUMNS //
       var itemColumns = [
         {
           label: "id",
@@ -1022,6 +1069,7 @@ define([
         }
       ];
 
+      // LAYOUT RELATED COLUMNS //
       var layoutColumns = [
         {
           label: "text-font",
@@ -1032,6 +1080,7 @@ define([
         }
       ];
 
+      // PAINT RELATED COLUMNS //
       var paintColumns = array.map(this.paintColorTypes, lang.hitch(this, function (paintColorType) {
         return {
           label: paintColorType.replace(/-color/, ""),
@@ -1041,6 +1090,7 @@ define([
         }
       }));
 
+      // RETURN LIST OF COLUMNS //
       if(displayAllColumns) {
         return sourceColumns.concat(itemColumns, paintColumns); //, layoutColumns);
       } else {
@@ -1049,6 +1099,7 @@ define([
     },
 
     /**
+     * USE NEW STYLE LAYERS IN ALL RELEVANT UI PLACES
      *
      * @param styleLayers
      */
@@ -1071,15 +1122,16 @@ define([
 
       // COLOR SELECTOR DIALOG //
       this.colorSelectorDialog.setBasemapColorStore(this.basemapColorsStore);
+
       // BASEMAP COLOR PALETTE LIST //
       this.basemapColorList.set("store", this.basemapColorsStore);
-
 
       // STYLE LAYERS STORE //
       this.styleLayersStore = new Observable(new Memory({data: styleLayers}));
 
       // ALL STYLES LIST //
       this.styleLayersList.set("store", this.styleLayersStore);
+
       // SOURCE-LAYER LIST //
       this.sourceLayerList.set("store", this.styleLayersStore);
 
@@ -1096,6 +1148,9 @@ define([
     },
 
     /**
+     * UPDATE BASEMAP COLOR PALETTE WHEN COLOR HAS BEEN REPLACED
+     *  - REMOVE COLOR IF NO OTHER STYLE IS USING THE OLD COLOR
+     *  - ADD COLOR IF NEW COLOR IS NOT IN THE CURRENT BASEMAP COLOR LIST
      *
      * @param sourceColor
      * @param targetColor
@@ -1103,6 +1158,7 @@ define([
      */
     updateBasemapColorPalette: function (sourceColor, targetColor) {
 
+      // HEX COLORS VALUES //
       var sourceColorHex = sourceColor.toUpperCase();
       var targetColorHex = targetColor.toUpperCase();
 
@@ -1111,13 +1167,16 @@ define([
       if(itemsWithColor.length === 0) {
         this.basemapColorsStore.remove(sourceColorHex);
       }
-      // IS THIS NEW COLOR NOT IN IN BASEMAP COLOR PALETTE? //
+      // IS THIS NEW COLOR NOT IN BASEMAP COLOR PALETTE? //
       if(!this.basemapColorsStore.get(targetColorHex)) {
         this.basemapColorsStore.add({id: targetColorHex, color: targetColorHex, luminosity: (new Color(targetColorHex)).toHsl().l});
       }
     },
 
     /**
+     * CREATE A COLOR NODE
+     *  - A COLOR NODE IS A DOM NODE WITH THE STYLE BACKGROUND OF THE COLOR AND
+     *    A NODE ATTRIBUTE CALLED 'data-color' WITH A VALUE OF THE COLOR AS HEX
      *
      * @param parent
      * @param colorStr
@@ -1139,6 +1198,7 @@ define([
     },
 
     /**
+     * UPDATE COLOR NODE
      *
      * @param colorNode
      * @param colorStr
@@ -1156,6 +1216,7 @@ define([
     },
 
     /**
+     * GET PAINT PROPERTY OF STYLE LAYER ITEM
      *
      * @param property
      * @param item
@@ -1171,6 +1232,8 @@ define([
     },
 
     /**
+     * RENDER PAINT PROPERTY CELL NODE
+     *  - A COLOR CELL REPRESENTS THE COLOR OF A PAINT PROPERTY OF A STYLE LAYER ITEM
      *
      * @param paintProperty
      * @param item
@@ -1196,6 +1259,8 @@ define([
     },
 
     /**
+     * CREATE COLOR CELL
+     *  - A COLOR CELL REPRESENTS THE COLOR OF A PAINT PROPERTY OF A STYLE LAYER ITEM
      *
      * @param parentNode
      * @param colorInfo
@@ -1247,6 +1312,7 @@ define([
     },
 
     /**
+     * SET THE SEARCH COLOR
      *
      * @param colorHex
      * @private
@@ -1257,6 +1323,7 @@ define([
     },
 
     /**
+     * SEARCH BY COLOR LIST FILTER
      *
      * @param searchColor
      * @param item
@@ -1277,6 +1344,7 @@ define([
     },
 
     /**
+     * SEARCH BY COLOR AND TYPE LIST FILTER
      *
      * @param item
      * @returns {boolean}
@@ -1303,6 +1371,8 @@ define([
     },
 
     /**
+     * SEARCH LIST FILTER
+     *  - NOTE: CURRENTLY NOT USED...
      *
      * @param item
      * @returns {boolean}
@@ -1354,6 +1424,7 @@ define([
     },
 
     /**
+     * DISPLAY STYLE LAYER JSON EDITOR
      *
      * @param item
      */
@@ -1376,7 +1447,11 @@ define([
     },
 
     /**
-     *
+     * APPLY BASEMAP STYLE
+     *  - CREATE APPLYSTYLE OPERATION AND ADD TO UNDO MANAGER
+     *  - CLONE PREVIOUS AND CURRENT STYLES
+     *  - UPDATE VECTOR TILE SERVICE LAYER WITH CURRENT STYLE
+     *  - UPDATE UI ELEMENTS WITH NEW STYLE
      */
     applyBasemapStyle: function (operationName) {
 
@@ -1411,9 +1486,9 @@ define([
     },
 
     /**
-     *
+     * UPDATE SELECTED USER VECTOR TILE SERVICE ITEM WITH CURRENT STYLE
      */
-    updateBasemapStyle: function () {
+    saveStyleChangesToUserItem: function () {
 
       if(this.selectedItem && this.vectorBasemapLayer) {
         // NEW STYLE //
@@ -1455,6 +1530,8 @@ define([
     },
 
     /**
+     * DISPLAY STYLE LAYER DETAILS
+     *  - NOTE: CURRENTLY NOT USED...
      *
      * @param style
      * @private
@@ -1495,33 +1572,7 @@ define([
   };
 
   MainApp.appName = "Vector Basemap Style Editor";
-  MainApp.version = "0.1.0";
+  MainApp.version = "0.1.1";
 
   return MainApp;
 });
-
-
-/*
- - From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
- - TODO: Does new dojo/_base/Color(...) work correctly for all these?
- {
- "line-color": "#ff0",
- "line-color": "#ffff00",
- "line-color": "rgb(255, 255, 0)",
- "line-color": "rgba(255, 255, 0, 1)",
- "line-color": "hsl(100, 50%, 50%)",
- "line-color": "hsla(100, 50%, 50%, 1)",
- "line-color": "yellow"
- }
-
- background-color
- fill-color
- fill-outline-color
- line-color
- icon-color
- icon-halo-color
- text-color
- text-halo-color
- circle-color
-
- */
