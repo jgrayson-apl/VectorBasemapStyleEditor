@@ -8,10 +8,6 @@ html, body {
   color       : #444;
 }
 
-.esriRTL label {
-  /*Example of a rule that will be applied if the app is viewed in a browser with a RTL locale like Hebrew or Arabic.*/
-}
-
 /* MAIN APP MESSAGES =========================================================== */
 .app-error .loading-message {
   background  : url(../images/error.png) no-repeat top center;
@@ -32,7 +28,7 @@ html, body {
   padding          : 40px;
   text-align       : center;
   font-size        : 2em;
-  background-color : rgba(51, 102, 153, 0.8);
+  background-color : rgba(25, 111, 166, 0.8);
 }
 
 .message-node .small-text {
@@ -54,10 +50,10 @@ html, body {
 /* MAIN APP MESSAGES =========================================================== */
 
 #main-container {
-  width  : 100%;
-  height : 100%;
-  margin : 0;
-  /*padding : 0;*/
+  width   : 100%;
+  height  : 100%;
+  margin  : 0;
+  padding : 0;
 }
 
 #main-container *,
@@ -66,14 +62,14 @@ html, body {
 }
 
 #main-container .dijitContentPane {
-  /*border : none !important;*/
+  background-color : #fff;
 }
 
 #main-top-pane {
   line-height      : 2.2em;
   overflow         : hidden;
   color            : #fff;
-  background-color : #336699;
+  background-color : #196fa6 !important;
 }
 
 #app-title {
@@ -82,7 +78,6 @@ html, body {
 }
 
 #app-sub-title {
-  font-size  : smaller;
   font-style : italic;
   margin     : 0 30px;
 }
@@ -230,7 +225,9 @@ html, body {
 }
 
 .dijitSlider .dijitSliderProgressBar {
-  background : #336699 !important;
+  background   : #196fa6 !important;
+  border-left  : solid 2px darkblue !important;
+  border-right : solid 2px darkblue !important;
 }
 
 .field-type {
@@ -417,11 +414,17 @@ html, body {
 }
 
 .clear-node {
-  float      : right;
-  cursor     : pointer;
-  width      : 24px;
-  height     : 24px;
-  background : url(../images/GenericDeleteRed32.png) no-repeat center / contain;
+  position    : absolute;
+  top         : 20px;
+  right       : 5px;
+  cursor      : pointer;
+  font-size   : larger;
+  font-weight : bolder;
+  color       : darkred;
+}
+
+.clear-node:hover {
+  color : red;
 }
 
 .esriSimpleSliderTL {
@@ -449,7 +452,7 @@ html, body {
   bottom     : 5px;
   left       : 5px;
   padding    : 5px;
-  color      : #336699;
+  color      : #196fa6;
   background : rgba(255, 255, 255, 0.8);
   box-shadow : 0 1px 1px rgba(0, 0, 0, 0.5);
 }
@@ -492,8 +495,7 @@ html, body {
 }
 
 .item-title {
-  float  : left;
-  margin : 3px;
+  float : left;
 }
 
 .item-title .dijitValidationTextBox {
@@ -519,29 +521,30 @@ html, body {
 }
 
 .basemap-item-action:hover {
-  color : #336699;
+  color : #196fa6;
 }
 
 .basemap-item-action:active {
   color : #21cdfa;
 }
 
-.dijitDialogTitleBar,
-.dijitButtonNode {
-  background : #336699 !important;
+.calcite .dijitDialogTitleBar,
+.calcite .dijitButtonNode {
+  background : #196fa6 !important;
   border     : none !important;
 }
 
-.dijitDialogTitle,
-.dijitButtonText {
+.calcite .dijitDialogTitle,
+.calcite .dijitButtonText {
   color : #fff !important;
 }
 
 .calcite .dijitCheckBox,
 .calcite .dijitCheckBoxIcon,
+.calcite .dijitToolbar .dijitButton,
 .calcite .dijitToolbar .dijitArrowButton,
 .calcite .dijitToolbar .dijitArrowButtonInner {
-  color : #fff;
+  color : #fff !important;
 }
 
 .calcite .dojoxMultiSelectItem {
@@ -550,10 +553,14 @@ html, body {
 }
 
 .calcite .dojoxMultiSelectItem:hover > .dojoxMultiSelectItemLabel {
-  color : #336699;
+  color : #196fa6;
 }
 
 .calcite .dojoxMultiSelectItemLabel {
   margin-left : 5px;
+}
+
+.calcite .dijitDialogPaneActionBar {
+  background-color : #F8F8FF;
 }
 

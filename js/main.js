@@ -309,7 +309,7 @@ define([
 
       // SOURCE-LAYER COMBOBOX FILTER //
       this.sourceLayerList = new UniqueComboBox({
-        style: "width:200px;",
+        style: "width:250px;",
         placeHolder: 'select source-layer',
         searchAttr: "source-layer",
         intermediateChanges: true,

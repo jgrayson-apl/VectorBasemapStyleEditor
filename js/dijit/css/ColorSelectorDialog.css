@@ -24,6 +24,10 @@
   border     : none !important;
 }
 
+.dojoxColorPickerOptional input {
+  width : 40px;
+}
+
 .dijitColorPalette .dijitPaletteImg {
   padding : 2px !important;
 }
