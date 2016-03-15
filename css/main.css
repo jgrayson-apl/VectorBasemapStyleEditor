@@ -212,11 +212,13 @@ html, body {
   width : 120px !important;
 }
 
-.field-zoom,
-.field-minzoom,
-.field-maxzoom {
-  width          : 120px !important;
-  text-align     : center !important;
+.field-zoom {
+  width      : 120px !important;
+  text-align : center !important;
+  cursor     : default;
+}
+
+.field-zoom .dijitSlider {
   pointer-events : none;
 }
 
@@ -528,10 +530,21 @@ html, body {
   color : #21cdfa;
 }
 
+.calcite .dijitDialogCloseIcon,
+.calcite .dijitDialogCloseIcon:hover {
+  color   : #fff;
+  opacity : 1.0;
+}
+
 .calcite .dijitDialogTitleBar,
 .calcite .dijitButtonNode {
   background : #196fa6 !important;
   border     : none !important;
+}
+
+.dijitButtonHover .dijitButtonNode,
+.dijitToggleButtonHover .dijitButtonNode {
+  background : #024a7e !important;
 }
 
 .calcite .dijitDialogTitle,

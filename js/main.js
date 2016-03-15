@@ -53,6 +53,7 @@ define([
   "dijit/form/ValidationTextBox",
   "dijit/form/CheckBox",
   "dijit/form/Select",
+  "dijit/Tooltip",
   "application/dijit/UniqueComboBox",
   "dojox/form/HorizontalRangeSlider",
   "esri/undoManager",
@@ -62,14 +63,14 @@ define([
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
              arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, vectorTile,
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
-             registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, UniqueComboBox,
+             registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
              HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
   /**
    * TODO: USE dojo/_base/Color(...) FROM THE VERY START FOR ALL COLOR ISSUES INSTEAD OF ASSUMING HEX VALUES...
    *
    *   From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
-   *   TODO: Does dojo/_base/Color(...) work correctly for all these?
+   *   TODO: does dojo/_base/Color(...) work correctly for all these possible color values?
    *
    *       "#ff0"
    *       "#ffff00"
@@ -232,7 +233,7 @@ define([
     updateUserInfo: function () {
       var portalUserNode = dom.byId("portaluser-section");
       if(this.portalUser) {
-        put(portalUserNode, "tr td $ <td img.user-thumb", this.portalUser.fullName, {src: this.portalUser.thumbnailUrl});
+        put(portalUserNode, "tr td $ <td img.user-thumb", this.portalUser.fullName, { src: this.portalUser.thumbnailUrl });
       } else {
         portalUserNode.innerHTML = "";
       }
@@ -249,7 +250,7 @@ define([
       // ITEM LIST //
       this.userBasemapsItemsList = new (declare([OnDemandGrid, Selection, DijitRegistry]))({
         bufferRows: 300,
-        sort: [{attribute: "title", descending: false}],
+        sort: [{ attribute: "title", descending: false }],
         noDataMessage: "No Items",
         selectionMode: "single",
         columns: [
@@ -295,7 +296,7 @@ define([
       // =========================================================================================== //
 
       // STYLE LAYER LIST //
-      var StyleLayersList = declare([OnDemandGrid, Selection, editor, DijitRegistry], {keepScrollPosition: true});
+      var StyleLayersList = declare([OnDemandGrid, Selection, editor, DijitRegistry], { keepScrollPosition: true });
 
       // =========================================================================================== //
 
@@ -313,7 +314,7 @@ define([
         placeHolder: 'select source-layer',
         searchAttr: "source-layer",
         intermediateChanges: true,
-        fetchProperties: {sort: [{attribute: "source-layer", descending: false}]}
+        fetchProperties: { sort: [{ attribute: "source-layer", descending: false }] }
       }, dom.byId("source-layer-combo"));
       this.sourceLayerList.startup();
       this.sourceLayerList.on("change", lang.hitch(this, function (evt) {
@@ -328,7 +329,7 @@ define([
 
       // STYLE LAYERS LIST //
       this.styleLayersList = new StyleLayersList({
-        sort: [{attribute: "source-layer", descending: false}, {attribute: "minzoom", descending: false}],
+        sort: [{ attribute: "source-layer", descending: false }, { attribute: "minzoom", descending: false }],
         noDataMessage: "No Styles",
         selectionMode: "none",
         columns: this.getStyleColumns(true),
@@ -336,6 +337,8 @@ define([
       }, put(dom.byId("full-list-node"), "div"));
       this.styleLayersList.startup();
       this.styleLayersList.on(".dgrid-cell.field-id:click", lang.hitch(this, this.idCellClick, this.styleLayersList));
+      this.styleLayersList.on(".dgrid-cell.field-zoom:mouseover", lang.hitch(this, this.zoomCellOver, this.styleLayersList));
+      this.styleLayersList.on(".dgrid-cell.field-zoom:mouseout", lang.hitch(this, this.zoomCellOut, this.styleLayersList));
 
       // CLEAR FILTERS //
       on(dom.byId("clear-source-layer-filter"), "click", lang.hitch(this, function (evt) {
@@ -353,11 +356,12 @@ define([
         noDataMessage: "No Styles",
         columns: this.getStyleColumns(),
         query: lang.hitch(this, this.searchByColorAndType),
-        sort: [{attribute: "source-layer", descending: false}, {attribute: "minzoom", descending: false}]
+        sort: [{ attribute: "source-layer", descending: false }, { attribute: "minzoom", descending: false }]
       }, put(dom.byId("search-results-node"), "div.style-layer-list"));
       this.searchResultsList.startup();
       this.searchResultsList.on(".dgrid-cell.field-id:click", lang.hitch(this, this.idCellClick, this.searchResultsList));
-
+      this.searchResultsList.on(".dgrid-cell.field-zoom:mouseover", lang.hitch(this, this.zoomCellOver, this.searchResultsList));
+      this.searchResultsList.on(".dgrid-cell.field-zoom:mouseout", lang.hitch(this, this.zoomCellOut, this.searchResultsList));
 
       // =========================================================================================== //
 
@@ -404,6 +408,30 @@ define([
     },
 
     /**
+     *
+     * @param list
+     * @param evt
+     */
+    zoomCellOver: function (list, evt) {
+      var cell = list.cell(evt);
+      var item = cell.row.data;
+      var zoomLevels = {
+        min: parseInt(item.minzoom || this.zoomRange.min, 10),
+        max: parseInt(item.maxzoom || this.zoomRange.max, 10)
+      };
+      Tooltip.show(lang.replace("<div style='width:120px;'>Zoom Levels: {min} to {max}</div>", zoomLevels), cell.element);
+    },
+
+    /**
+     *
+     * @param list
+     * @param evt
+     */
+    zoomCellOut: function (list, evt) {
+      Tooltip.hide(list.cell(evt).element);
+    },
+
+    /**
      * EDIT STYLE JSON DIRECTLY
      *
      * @param list
@@ -424,7 +452,7 @@ define([
 
       this.styleLayerTypesStore = new Memory({
         data: array.map(this.styleLayerTypes, lang.hitch(this, function (styleLayerType) {
-          return {id: styleLayerType, name: styleLayerType}
+          return { id: styleLayerType, name: styleLayerType }
         }))
       });
 
@@ -522,7 +550,7 @@ define([
     initializeUndoManager: function () {
 
       // UNDO MANAGER //
-      this.undoManager = new UndoManager({maxOperations: 100});
+      this.undoManager = new UndoManager({ maxOperations: 100 });
       // UNDO MANAGER EVENT //
       this.undoManager.on("change", lang.hitch(this, function (evt) {
         registry.byId("undo-btn").set("disabled", !this.undoManager.canUndo);
@@ -625,7 +653,7 @@ define([
           console.info("QUERY RESPONSE: ", queryResponse);
 
           // ITEM STORE //
-          this.userBasemapsItemsStore = new Observable(new Memory({data: queryResponse.results}));
+          this.userBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
           // ITEM LIST //
           this.userBasemapsItemsList.set("store", this.userBasemapsItemsStore);
           this.userBasemapsItemsList.select(this.userBasemapsItemsStore.data[0].id);
@@ -652,7 +680,7 @@ define([
           q: lang.replace(itemQuery, this.portalUser)
         }).then(lang.hitch(this, function (queryResponse) {
           // ESRI BASEMAPS ITEM STORE //
-          this.esriBasemapsItemsStore = new Observable(new Memory({data: queryResponse.results}));
+          this.esriBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
           registry.byId("create-copy-btn").set("disabled", false);
         }));
 
@@ -660,7 +688,7 @@ define([
         registry.byId("create-copy-btn").on("click", lang.hitch(this, function () {
 
           // CREATE BASEMAP COPY DIALOG //
-          var createCopyDlg = new ConfirmDialog({title: "Copy Esri Vector Basemap Item"});
+          var createCopyDlg = new ConfirmDialog({ title: "Copy Esri Vector Basemap Item" });
           createCopyDlg.okButton.set("disabled", true);
           createCopyDlg.show();
 
@@ -671,7 +699,7 @@ define([
             required: true,
             invalidMessage: "Item with this title already exists...",
             validator: lang.hitch(this, function (value, constraints) {
-              var isValidTitle = value ? (this.userBasemapsItemsStore.query({title: value}).total === 0) : false;
+              var isValidTitle = value ? (this.userBasemapsItemsStore.query({ title: value }).total === 0) : false;
               createCopyDlg.okButton.set("disabled", !isValidTitle);
               return isValidTitle;
             })
@@ -688,7 +716,7 @@ define([
             renderRow: lang.hitch(this, function (item) {
               var basemapNode = put("div.basemap-node");
               put(basemapNode, "div.basemap-title-node", item.title);
-              put(basemapNode, "img.basemap-thumb-node", {src: item.thumbnailUrl});
+              put(basemapNode, "img.basemap-thumb-node", { src: item.thumbnailUrl });
               put(basemapNode, "div.basemap-snippet-node", item.snippet);
               //put(basemapNode, "fieldset.basemap-description-node", {legend: 'Description', innerHTML: item.description});
               return basemapNode;
@@ -709,7 +737,7 @@ define([
           this.suggestTitle = lang.hitch(this, function (initialTitle) {
             var copyCount = 1;
             var newTitle = initialTitle + " - Copy";
-            while (this.userBasemapsItemsStore.query({title: newTitle}).total > 0) {
+            while (this.userBasemapsItemsStore.query({ title: newTitle }).total > 0) {
               newTitle = initialTitle + " - Copy" + (++copyCount);
             }
             return newTitle;
@@ -746,13 +774,13 @@ define([
                   // GET COPY ITEM STYLE //
                   esriRequest({
                     url: lang.replace("{itemUrl}/resources/styles/root.json", copyItem),
-                    content: {f: "json"}
+                    content: { f: "json" }
                   }).then(lang.hitch(this, function (copyStyle) {
 
                     // UPDATE STYLE TO USE USE GLYPHS AND SPRITES FROM COPY BASEMAP ITEM //
                     var newStyle = lang.mixin({}, copyStyle, {
-                      glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", {item: copyItem, style: copyStyle}),
-                      sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", {item: copyItem, style: copyStyle})
+                      glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", { item: copyItem, style: copyStyle }),
+                      sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", { item: copyItem, style: copyStyle })
                     });
 
                     // URL INFO //
@@ -771,17 +799,16 @@ define([
                         filename: "root.json",
                         text: json.stringify(newStyle)
                       }
-                    }, {usePost: true}).then(lang.hitch(this, function (addResourcesResponse) {
+                    }, { usePost: true }).then(lang.hitch(this, function (addResourcesResponse) {
                       if(addResourcesResponse.success) {
-                        alert("Esri Vector Basemap copied...");
-
+                        this.displayMessageDialog("Esri Vector Basemap copied...");
                         // GET NEW BASEMAP ITEM //
                         this.portalUser.getItem(addItemResponse.id).then(lang.hitch(this, function (newBasemapItem) {
                           this.userBasemapsItemsStore.add(newBasemapItem);
                         }), console.warn);
 
                       } else {
-                        alert("Unable to copy Esri Basemap");
+                        this.displayMessageDialog("Unable to copy Esri Basemap");
                         console.warn("Unable to copy Esri Basemap: ", addResourcesResponse);
                       }
                     }));
@@ -875,7 +902,7 @@ define([
         // GET STYLE //
         esriRequest({
           url: lang.replace("{itemUrl}/resources/styles/root.json", this.selectedItem),
-          content: {f: "json"}
+          content: { f: "json" }
         }).then(lang.hitch(this, function (style) {
 
           // VECTOR BASEMAP LAYER //
@@ -999,7 +1026,7 @@ define([
 
       setTimeout(lang.hitch(this, function () {
         var styleVisibility = (isVisible ? this.LAYOUT_VISIBILITY.VISIBLE : this.LAYOUT_VISIBILITY.NONE);
-        item.layout = lang.mixin(item.layout || {}, {visibility: styleVisibility});
+        item.layout = lang.mixin(item.layout || {}, { visibility: styleVisibility });
         this.styleLayersStore.put(item);
         deferred.resolve();
       }), 0);
@@ -1026,7 +1053,7 @@ define([
           }),
           renderCell: lang.hitch(this, function (item, value, node, options) {
             // VISIBILITY CHECKBOX //
-            var visCheckBox = new CheckBox({checked: value});
+            var visCheckBox = new CheckBox({ checked: value });
             visCheckBox.on("change", lang.hitch(this, function (isChecked) {
               this._updateItemVisibility(item, isChecked).then(lang.hitch(this, function () {
                 this.applyBasemapStyle("Visibility Update");
@@ -1106,7 +1133,7 @@ define([
     displayStyleLayers: function (styleLayers) {
 
       // BASEMAP COLORS STORE //
-      this.basemapColorsStore = new Observable(new Memory({data: []}));
+      this.basemapColorsStore = new Observable(new Memory({ data: [] }));
 
       // CREATE COLOR STORE FOR ALL COLORS IN STYLE  //
       array.forEach(styleLayers, lang.hitch(this, function (styleLayer) {
@@ -1115,7 +1142,7 @@ define([
         array.forEach(colorMatches, lang.hitch(this, function (colorMatch) {
           var hexColor = colorMatch.toUpperCase();
           if(!this.basemapColorsStore.get(hexColor)) {
-            this.basemapColorsStore.add({id: hexColor, color: hexColor, luminosity: (new Color(hexColor)).toHsl().l});
+            this.basemapColorsStore.add({ id: hexColor, color: hexColor, luminosity: (new Color(hexColor)).toHsl().l });
           }
         }));
       }));
@@ -1127,7 +1154,7 @@ define([
       this.basemapColorList.set("store", this.basemapColorsStore);
 
       // STYLE LAYERS STORE //
-      this.styleLayersStore = new Observable(new Memory({data: styleLayers}));
+      this.styleLayersStore = new Observable(new Memory({ data: styleLayers }));
 
       // ALL STYLES LIST //
       this.styleLayersList.set("store", this.styleLayersStore);
@@ -1169,7 +1196,7 @@ define([
       }
       // IS THIS NEW COLOR NOT IN BASEMAP COLOR PALETTE? //
       if(!this.basemapColorsStore.get(targetColorHex)) {
-        this.basemapColorsStore.add({id: targetColorHex, color: targetColorHex, luminosity: (new Color(targetColorHex)).toHsl().l});
+        this.basemapColorsStore.add({ id: targetColorHex, color: targetColorHex, luminosity: (new Color(targetColorHex)).toHsl().l });
       }
     },
 
@@ -1186,7 +1213,7 @@ define([
      * @private
      */
     _createColorNode: function (parent, colorStr, classNames, addColorName) {
-      var colorNode = put(parent, "span.color-node" + (classNames || ""), {title: colorStr});
+      var colorNode = put(parent, "span.color-node" + (classNames || ""), { title: colorStr });
       if(addColorName) {
         colorNode.nameNode = put(parent, "span.color-name-node", colorStr);
       }
@@ -1501,7 +1528,7 @@ define([
             f: "json",
             resource: "styles/root.json"
           }
-        }, {usePost: true}).then(lang.hitch(this, function (removeResponse) {
+        }, { usePost: true }).then(lang.hitch(this, function (removeResponse) {
           if(removeResponse.success) {
             // ADD NEW STYLE //
             esriRequest({
@@ -1512,21 +1539,30 @@ define([
                 filename: "root.json",
                 text: json.stringify(newStyle)
               }
-            }, {usePost: true}).then(function (addResponse) {
+            }, { usePost: true }).then(function (addResponse) {
               if(addResponse.success) {
-                alert("Vector basemap style updated");
+                this.displayMessageDialog("Vector basemap style updated");
               } else {
-                alert("Unable to add new style");
+                this.displayMessageDialog("Unable to add new style");
                 console.warn("Unable to add new style", addResponse);
               }
             });
           } else {
-            alert("Unable to remove previous style");
+            this.displayMessageDialog("Unable to remove previous style");
             console.warn("Unable to remove previous style", removeResponse);
           }
         }));
       }
 
+    },
+
+    /**
+     * DISPLAY MESSAGE IN DIALOG
+     *
+     * @param message
+     */
+    displayMessageDialog: function (message) {
+      (new ConfirmDialog({ title: MainApp.appName, content: message })).show();
     },
 
     /**
