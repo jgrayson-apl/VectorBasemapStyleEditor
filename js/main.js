@@ -58,13 +58,14 @@ define([
   "dojox/form/HorizontalRangeSlider",
   "esri/undoManager",
   "application/Operations/ApplyStyle",
+  "application/Operations/StyleUpdate",
   "application/dijit/ColorSelectorDialog",
   "application/jsoneditor-master/dist/jsoneditor"
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
              arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, vectorTile,
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
-             HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
+             HorizontalRangeSlider, UndoManager, ApplyStyle, StyleUpdate, ColorSelectorDialog, JSONEditor) {
 
   /**
    * TODO: USE dojo/_base/Color(...) FROM THE VERY START FOR ALL COLOR ISSUES INSTEAD OF ASSUMING HEX VALUES...
@@ -414,12 +415,14 @@ define([
      */
     zoomCellOver: function (list, evt) {
       var cell = list.cell(evt);
-      var item = cell.row.data;
-      var zoomLevels = {
-        min: parseInt(item.minzoom || this.zoomRange.min, 10),
-        max: parseInt(item.maxzoom || this.zoomRange.max, 10)
-      };
-      Tooltip.show(lang.replace("<div style='width:120px;'>Zoom Levels: {min} to {max}</div>", zoomLevels), cell.element);
+      if(cell.row) {
+        var item = cell.row.data;
+        var zoomLevelInfos = {
+          min: parseInt(item.minzoom || this.zoomRange.min, 10),
+          max: parseInt(item.maxzoom || this.zoomRange.max, 10)
+        };
+        Tooltip.show(lang.replace("<div style='width:120px;'>Zoom Levels: {min} to {max}</div>", zoomLevelInfos), cell.element);
+      }
     },
 
     /**
@@ -500,7 +503,7 @@ define([
           }));
           all(itemUpdates).then(lang.hitch(this, function () {
             // APPLY STYLE //
-            this.applyBasemapStyle("Batch Color Find/Replace");
+            this.applyBasemapStyle("Batch Color Replace");
           }), console.warn);
 
           // UPDATE COLOR NODE AND SET AS SEARCH COLOR //
@@ -908,15 +911,15 @@ define([
           // VECTOR BASEMAP LAYER //
           // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
           //   HERE WE PASS IN THE STYLE DIRECTLY INTO THE CONSTRUCTOR
-          this.vectorBasemapLayer = new VectorTileLayer(this._cloneStyle(style));
+          this.vectorBasemapLayer = new VectorTileLayer(this._cloneVectorTileLayerStyle(style));
           this.vectorBasemapLayer.on("error", lang.hitch(this, function (evt) {
             console.warn("vectorBasemapLayer.error: ", evt.error);
           }));
           this.vectorBasemapLayer.on("load", lang.hitch(this, function () {
 
             // VECTOR BASEMAP STYLES //
-            this.vectorBasemapStylePrevious = this._cloneStyle(style);
-            this.vectorBasemapStyle = this._cloneStyle(style);
+            this.vectorBasemapStylePrevious = this._cloneVectorTileLayerStyle(style);
+            this.vectorBasemapStyle = this._cloneVectorTileLayerStyle(style);
 
             // DISPLAY STYLE LAYERS //
             this.displayStyleLayers(this.vectorBasemapStyle.layers);
@@ -946,7 +949,7 @@ define([
      * @returns {*}
      * @private
      */
-    _cloneStyle: function (style) {
+    _cloneVectorTileLayerStyle: function (style) {
       var clonedStyle = lang.clone(style);
       if(clonedStyle.hasOwnProperty("_ssl")) {
         delete clonedStyle._ssl;
@@ -1474,6 +1477,36 @@ define([
     },
 
     /**
+     *
+     * @param updateType
+     * @param undoItems
+     * @param redoItems
+     */
+    updateBasemapStyle: function (updateType, undoItems, redoItems) {
+      if(this.undoManager) {
+        // ALLOW UNDO/REDO OPERATION //
+        var styleUpdateOperation = new StyleUpdate({
+          label: updateType || StyleUpdate.defaultLabel,
+          store: this.styleLayersStore,
+          undoItems: undoItems,
+          redoItems: redoItems,
+          updateStyleCallback: function () {
+
+            this.vectorBasemapStyle.layers = this.styleLayersStore.query();
+
+            // SET STYLE OF VECTOR BASEMAP //
+            this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
+            // DISPLAY STYLE LAYERS //
+            this.displayStyleLayers(this.vectorBasemapStyle.layers);
+
+          }.bind(this)
+        });
+        this.undoManager.add(styleUpdateOperation);
+      }
+
+    },
+
+    /**
      * APPLY BASEMAP STYLE
      *  - CREATE APPLYSTYLE OPERATION AND ADD TO UNDO MANAGER
      *  - CLONE PREVIOUS AND CURRENT STYLES
@@ -1489,23 +1522,23 @@ define([
           var applyStyleOperation = new ApplyStyle({
             label: operationName || ApplyStyle.defaultLabel,
             layer: this.vectorBasemapLayer,
-            undoStyle: this._cloneStyle(this.vectorBasemapStylePrevious),
-            redoStyle: this._cloneStyle(this.vectorBasemapStyle),
+            undoStyle: this._cloneVectorTileLayerStyle(this.vectorBasemapStylePrevious),
+            redoStyle: this._cloneVectorTileLayerStyle(this.vectorBasemapStyle),
             applyStyleCallback: lang.hitch(this, this.displayStyleLayers)
           });
           this.undoManager.add(applyStyleOperation);
         }
 
         // UPDATE STYLES //
-        this.vectorBasemapStylePrevious = this._cloneStyle(this.vectorBasemapStyle);
-        this.vectorBasemapStyle = this._cloneStyle(this.vectorBasemapStyle);
+        this.vectorBasemapStylePrevious = this._cloneVectorTileLayerStyle(this.vectorBasemapStyle);
+        this.vectorBasemapStyle = this._cloneVectorTileLayerStyle(this.vectorBasemapStyle);
 
         //this.fullJsonEditor.set(this.vectorBasemapStyle, "", true);
         //dom.byId("json-editor-node").innerHTML = "";
         //put(dom.byId("json-editor-node"), "pre", json.stringify(this.vectorBasemapStyle, null, "  "));
 
         // SET STYLE OF VECTOR BASEMAP //
-        this.vectorBasemapLayer.setStyle(this._cloneStyle(this.vectorBasemapStyle));
+        this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
         // DISPLAY STYLE LAYERS //
         this.displayStyleLayers(this.vectorBasemapStyle.layers);
 
@@ -1519,7 +1552,7 @@ define([
 
       if(this.selectedItem && this.vectorBasemapLayer) {
         // NEW STYLE //
-        var newStyle = this.vectorBasemapStyle;
+        var newStyle = this._cloneVectorTileLayerStyle(this.vectorBasemapStyle);
 
         // REMOVE PREVIOUS STYLE //
         esriRequest({

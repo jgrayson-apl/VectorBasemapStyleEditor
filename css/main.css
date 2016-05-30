@@ -283,7 +283,7 @@ html, body {
 #eye-tool-node {
   z-index    : 99;
   position   : absolute;
-  top        : 5px;
+  top        : 7px;
   left       : 115px;
   box-shadow : 0 1px 1px rgba(0, 0, 0, 0.5);
 }

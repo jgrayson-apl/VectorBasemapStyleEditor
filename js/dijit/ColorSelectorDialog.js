@@ -63,7 +63,9 @@ define([
 
       // SELECTED COLOR //
       var selectedColorPane = put(this.actionBarNode, "span.selected-color-pane");
+      this.sourceColorNode = this._createColorNode(selectedColorPane, "#FF0000", ".selected-color-node", true, true);
       this.selectedColorNode = this._createColorNode(selectedColorPane, "#FF0000", ".selected-color-node", true);
+
 
       // MAIN CONTAINER //
       var colorSelectorMainContainer = new BorderContainer({
@@ -80,7 +82,7 @@ define([
 
 
       // CUSTOM COLORS //
-      this.customColorPicker = new ColorPicker({className: this.baseClass + "-colors-custom", liveUpdate: true});
+      this.customColorPicker = new ColorPicker({ className: this.baseClass + "-colors-custom", liveUpdate: true });
       this.customColorPicker.on("change", lang.hitch(this, function (customColor) {
         this._updateColorNode(this.selectedColorNode, customColor.toUpperCase());
       }));
@@ -92,7 +94,9 @@ define([
         content: this.customColorPicker
       }, put(colorSelectorMainContainer.containerNode, "div"));
 
+      //
       // BASEMAP COLORS //
+      //
       var basemapColorsPane = new ContentPane({
         title: "Basemap"
       });
@@ -112,8 +116,10 @@ define([
       this.colorSelectorBasemapColorList.startup();
       colorSelectorTabContainer.addChild(basemapColorsPane);
 
+      //
       // PREDEFINED COLORS //
-      var predefinedColorPalette = new ColorPalette({className: this.baseClass + "-colors-predefined"});
+      //
+      var predefinedColorPalette = new ColorPalette({ className: this.baseClass + "-colors-predefined" });
       predefinedColorPalette.on("change", lang.hitch(this, function (predefinedColor) {
         this.customColorPicker.setColor(predefinedColor.toUpperCase(), true);
       }));
@@ -123,8 +129,9 @@ define([
       });
       colorSelectorTabContainer.addChild(predefinedColorsPane);
 
-
+      //
       // COLOR LIST //
+      //
       var ColorList = declare([OnDemandList, Selection, DijitRegistry], {
         sort: "luminosity",
         selectionMode: "single",
@@ -137,7 +144,9 @@ define([
         })
       });
 
+      //
       // VARIATIONS FROM SOURCE COLORS //
+      //
       var variationsColorsPane = new ContentPane({
         title: "Variations"
       });
@@ -149,15 +158,16 @@ define([
         var variationsListNode = put(variationsColorsPane.containerNode, "div.variations-node", variation);
         var variationsColorList = new ColorList({
           className: "dgrid-autoheight",
-          query: {type: variation}
+          query: { type: variation }
         }, put(variationsListNode, "div.variations-grid div"));
         variationsColorList.startup();
 
         this.variationsColorLists[variation] = variationsColorList;
       }));
 
-
+      //
       // PALETTES FROM SOURCE COLORS //
+      //
       var palettesColorsPane = new ContentPane({
         title: "Palettes"
       });
@@ -170,7 +180,7 @@ define([
         var paletteColorList = new ColorList({
           className: "dgrid-autoheight",
           sort: "index",
-          query: {type: colorTheory}
+          query: { type: colorTheory }
         }, put(paletteListNode, "div.variations-grid div"));
         paletteColorList.startup();
 
@@ -185,13 +195,18 @@ define([
      * @param colorText
      * @param classNames
      * @param addColorName
+     * @param addBefore
      * @returns {*}
      * @private
      */
-    _createColorNode: function (parent, colorText, classNames, addColorName) {
-      var colorNode = put(parent, "span.color-node" + (classNames || ""), {title: colorText});
+    _createColorNode: function (parent, colorText, classNames, addColorName, addBefore) {
+      var colorNode = put(parent, "span.color-node" + (classNames || ""), { title: colorText });
       if(addColorName) {
-        colorNode.nameNode = put(parent, "span.color-name-node", colorText);
+        if(addBefore) {
+          colorNode.nameNode = put(colorNode, "-span.color-name-node", colorText);
+        } else {
+          colorNode.nameNode = put(parent, "span.color-name-node", colorText);
+        }
       }
 
       domAttr.set(colorNode, "data-color", colorText);
@@ -234,6 +249,7 @@ define([
      */
     setColors: function (sourceColor, targetColor) {
       this.customColorPicker.setColor(targetColor, true);
+      this._updateColorNode(this.sourceColorNode, sourceColor.toUpperCase());
       this._setVariationsColors(sourceColor);
       this._setPaletteColors(sourceColor);
     },
@@ -260,11 +276,11 @@ define([
         var colorPalette = Palette.generate(sourceColor, colorTheory);
         array.forEach(colorPalette.colors, lang.hitch(this, function (paletteColor, colorIndex) {
           var paletteColorHex = paletteColor.toHex().toUpperCase();
-          paletteColors.push({id: paletteColorHex, color: paletteColorHex, luminosity: paletteColor.toHsl().l, type: colorTheory, index: colorIndex});
+          paletteColors.push({ id: paletteColorHex, color: paletteColorHex, luminosity: paletteColor.toHsl().l, type: colorTheory, index: colorIndex });
         }));
       }));
 
-      var colorPaletteStore = new Memory({data: paletteColors});
+      var colorPaletteStore = new Memory({ data: paletteColors });
 
       array.forEach(this.colorTheoryList, lang.hitch(this, function (colorTheory) {
         this.paletteColorLists[colorTheory].set("store", colorPaletteStore);
@@ -288,25 +304,25 @@ define([
         // HSL Saturation //
         var variationHSLSat = ColorX.fromHsl(colorHSL.h, index, colorHSL.l);
         var variationHSLSatHex = variationHSLSat.toHex().toUpperCase();
-        variationsColors.push({id: variationHSLSatHex, color: variationHSLSatHex, luminosity: colorHSL.l, type: "HSL Saturation"});
+        variationsColors.push({ id: variationHSLSatHex, color: variationHSLSatHex, luminosity: colorHSL.l, type: "HSL Saturation" });
 
         // HSL Brighter / Darker //
         var variationHSLVal = ColorX.fromHsl(colorHSL.h, colorHSL.s, index);
         var variationHSLValHex = variationHSLVal.toHex().toUpperCase();
-        variationsColors.push({id: variationHSLValHex, color: variationHSLValHex, luminosity: index, type: "HSL Brighter / Darker"});
+        variationsColors.push({ id: variationHSLValHex, color: variationHSLValHex, luminosity: index, type: "HSL Brighter / Darker" });
 
         // HSV Saturation //
         var variationHSVSat = ColorX.fromHsv(colorHSV.h, index, colorHSV.v);
         var variationHSVSatHex = variationHSVSat.toHex().toUpperCase();
-        variationsColors.push({id: variationHSVSatHex, color: variationHSVSatHex, luminosity: variationHSVSat.toHsl().l, type: "HSV Saturation"});
+        variationsColors.push({ id: variationHSVSatHex, color: variationHSVSatHex, luminosity: variationHSVSat.toHsl().l, type: "HSV Saturation" });
 
         // HSV Brighter / Darker //
         var variationHSVVal = ColorX.fromHsv(colorHSV.h, colorHSV.s, index);
         var variationHSVValHex = variationHSVVal.toHex().toUpperCase();
-        variationsColors.push({id: variationHSVValHex, color: variationHSVValHex, luminosity: variationHSVVal.toHsl().l, type: "HSV Brighter / Darker"});
+        variationsColors.push({ id: variationHSVValHex, color: variationHSVValHex, luminosity: variationHSVVal.toHsl().l, type: "HSV Brighter / Darker" });
       }
 
-      var variationsStore = new Memory({data: variationsColors});
+      var variationsStore = new Memory({ data: variationsColors });
 
       array.forEach(this.variationsList, lang.hitch(this, function (variation) {
         this.variationsColorLists[variation].set("store", variationsStore);
