@@ -1140,14 +1140,18 @@ define([
 
       // CREATE COLOR STORE FOR ALL COLORS IN STYLE  //
       array.forEach(styleLayers, lang.hitch(this, function (styleLayer) {
-        var paintInfo = json.stringify(styleLayer["paint"]);
-        var colorMatches = paintInfo.match(this.hexColorRegEx);
-        array.forEach(colorMatches, lang.hitch(this, function (colorMatch) {
-          var hexColor = colorMatch.toUpperCase();
-          if(!this.basemapColorsStore.get(hexColor)) {
-            this.basemapColorsStore.add({ id: hexColor, color: hexColor, luminosity: (new Color(hexColor)).toHsl().l });
-          }
-        }));
+        if(styleLayer.hasOwnProperty("paint")) {
+          var paintInfo = json.stringify(styleLayer["paint"]);
+          var colorMatches = paintInfo.match(this.hexColorRegEx);
+          array.forEach(colorMatches, lang.hitch(this, function (colorMatch) {
+            var hexColor = colorMatch.toUpperCase();
+            if(!this.basemapColorsStore.get(hexColor)) {
+              this.basemapColorsStore.add({ id: hexColor, color: hexColor, luminosity: (new Color(hexColor)).toHsl().l });
+            }
+          }));
+        } else {
+          console.warn("No PAINT in style layer: ", styleLayer);
+        }
       }));
 
       // COLOR SELECTOR DIALOG //
