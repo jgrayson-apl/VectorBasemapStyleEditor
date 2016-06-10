@@ -1140,7 +1140,7 @@ define([
 
       // CREATE COLOR STORE FOR ALL COLORS IN STYLE  //
       array.forEach(styleLayers, lang.hitch(this, function (styleLayer) {
-        if(styleLayer.hasOwnProperty("paint")) {
+        if(styleLayer.hasOwnProperty("paint")) { // 'paint' is optional...
           var paintInfo = json.stringify(styleLayer["paint"]);
           var colorMatches = paintInfo.match(this.hexColorRegEx);
           array.forEach(colorMatches, lang.hitch(this, function (colorMatch) {
@@ -1150,7 +1150,7 @@ define([
             }
           }));
         } else {
-          console.warn("No PAINT in style layer: ", styleLayer);
+          console.warn("No PAINT in style layer: ", json.stringify(styleLayer));
         }
       }));
 

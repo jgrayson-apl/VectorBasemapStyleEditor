@@ -11,7 +11,23 @@
  * Created:  11/30/2015 - 0.0.1 -
  * Modified: 12/18/2015 - 0.0.2 - GET searchAttr FROM COMBOX AND PASS ON TO COMBOXMENU
  *
+ *
+ * Usage:
+ *
+ *  var itemList = new UniqueComboBox({
+ *    style: "width:250px;",
+ *    placeHolder: 'select item',
+ *    searchAttr: "source-layer",
+ *    intermediateChanges: true,
+ *    fetchProperties: { sort: [{ attribute: "source-layer", descending: false }] }
+ *  }, "source-layer-combo");
+ *  itemList.startup();
+ *  itemList.on("change", lang.hitch(this, function (evt) {
+ *    console.info(evt);
+ *  }));
+ *
  */
+
 define([
   "dojo/_base/declare",
   "dijit/form/ComboBox",
