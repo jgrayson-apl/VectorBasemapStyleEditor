@@ -167,9 +167,11 @@ define([
         this.portal.signIn().then(lang.hitch(this, function (loggedInUser) {
 
           // PORTAL ONLY SUPPORTS HTTPS //
-          if(this.portal.allSSL && (window.location.protocol !== "https:")) {
-            window.location.protocol = "https:";
-            window.location.reload();
+          var notSecure = /http:/i;
+          if(this.portal.allSSL && notSecure.test(window.location.protocol)) {
+            alert("Your ArcGIS.com organization requires all traffic be secure.  Please sign in again after we restart this app...");
+            // FORCE HTTPS //
+            window.location = window.location.href.replace(notSecure, "https:");
           }
 
           // WELCOME DIALOG CONTENT //
