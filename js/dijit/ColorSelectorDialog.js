@@ -24,8 +24,7 @@ define([
   "dojox/widget/ColorPicker",
   "dijit/layout/BorderContainer",
   "dijit/layout/TabContainer",
-  "dijit/layout/ContentPane",
-  "xstyle!./css/ColorSelectorDialog.css"
+  "dijit/layout/ContentPane"
 ], function (declare, ConfirmDialog,
              lang, array, on, dom, domAttr, domStyle, domClass,
              put, Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,

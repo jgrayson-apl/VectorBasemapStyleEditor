@@ -40,7 +40,7 @@ define([
   "esri/dijit/HomeButton",
   "esri/dijit/Search",
   "esri/layers/VectorTileLayer",
-  "esri/layers/vector-tile",
+  /*"esri/layers/vector-tile",*/
   "dojo/store/Memory",
   "dojo/store/Observable",
   "dgrid/OnDemandList",
@@ -62,12 +62,13 @@ define([
   "application/dijit/ColorSelectorDialog",
   "application/jsoneditor-master/dist/jsoneditor"
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
-             arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, vectorTile,
+             arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, /* vectorTile,*/
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
              HorizontalRangeSlider, UndoManager, ApplyStyle, StyleUpdate, ColorSelectorDialog, JSONEditor) {
 
   /**
+   *
    * TODO: USE dojo/_base/Color(...) FROM THE VERY START FOR ALL COLOR ISSUES INSTEAD OF ASSUMING HEX VALUES...
    *
    *   From: https://www.mapbox.com/mapbox-gl-style-spec/#types-color
@@ -146,7 +147,7 @@ define([
     constructor: function (config) {
       declare.safeMixin(this, config);
       // PRESERVE DRAWING BUFFER SO WE CAN GET TO THE PIXELS WHEN USING THE PICK COLOR MAP TOOL //
-      vectorTile.Renderer.prototype.options.preserveDrawingBuffer = true;
+      //vectorTile.Renderer.prototype.options.preserveDrawingBuffer = true;
     },
 
     /**
@@ -167,12 +168,12 @@ define([
         this.portal.signIn().then(lang.hitch(this, function (loggedInUser) {
 
           // PORTAL ONLY SUPPORTS HTTPS //
-          var notSecure = /http:/i;
-          if(this.portal.allSSL && notSecure.test(window.location.protocol)) {
-            alert("Your ArcGIS.com organization requires all traffic be secure.  Please sign in again after we restart this app...");
-            // FORCE HTTPS //
-            window.location = window.location.href.replace(notSecure, "https:");
-          }
+          /*var notSecure = /http:/i;
+           if(this.portal.allSSL && notSecure.test(window.location.protocol)) {
+           alert("Your ArcGIS.com organization requires all traffic be secure.  Please sign in again after we restart this app...");
+           // FORCE HTTPS //
+           window.location = window.location.href.replace(notSecure, "https:");
+           }*/
 
           // WELCOME DIALOG CONTENT //
           var welcomeContent = put("ul.welcome-content");
@@ -661,7 +662,9 @@ define([
           this.userBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
           // ITEM LIST //
           this.userBasemapsItemsList.set("store", this.userBasemapsItemsStore);
-          this.userBasemapsItemsList.select(this.userBasemapsItemsStore.data[0].id);
+          if(queryResponse.total > 0) {
+            this.userBasemapsItemsList.select(this.userBasemapsItemsStore.data[0].id);
+          }
 
         }));
       }
@@ -897,7 +900,7 @@ define([
           this.initSearch();
 
           // INITIALIZE EYE TOOL //
-          this.initializeEyeTool();
+          //this.initializeEyeTool();
 
         } else {
           // REMOVE PREVIOUS LAYERS //
@@ -909,6 +912,7 @@ define([
           url: lang.replace("{itemUrl}/resources/styles/root.json", this.selectedItem),
           content: { f: "json" }
         }).then(lang.hitch(this, function (style) {
+          console.info("root.json", style);
 
           // VECTOR BASEMAP LAYER //
           // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
@@ -918,6 +922,10 @@ define([
             console.warn("vectorBasemapLayer.error: ", evt.error);
           }));
           this.vectorBasemapLayer.on("load", lang.hitch(this, function () {
+
+            this.vectorBasemapLayer.on("style-change", function (event) {
+              console.info("style-change: ", event);
+            });
 
             // VECTOR BASEMAP STYLES //
             this.vectorBasemapStylePrevious = this._cloneVectorTileLayerStyle(style);
@@ -993,7 +1001,9 @@ define([
       // MOUSE MOVE //
       this.eyeTool.mapClickHandle = on.pausable(this.map, "click", lang.hitch(this, function (evt) {
 
-        var glContext = this.vectorBasemapLayer.gl.painter.gl;
+        //var glContext = this.vectorBasemapLayer.gl.painter.gl;
+        var glContext = this.vectorBasemapLayer._stageGL._renderingContext.gl;
+
         var pixelValues = new Uint8Array(4);
         glContext.readPixels(evt.screenPoint.x, (this.map.height - evt.screenPoint.y), 1, 1, glContext.RGBA, glContext.UNSIGNED_BYTE, pixelValues);
         var screenColor = new Color([pixelValues[0], pixelValues[1], pixelValues[2], pixelValues[3] / 255]);
@@ -1047,7 +1057,7 @@ define([
       // SOURCE RELATED COLUMNS //
       var sourceColumns = [
         {
-          label: "vis",
+          label: "",
           field: "visibility",
           get: lang.hitch(this, function (item) {
             if(item.layout && item.layout.visibility) {
@@ -1317,7 +1327,7 @@ define([
 
       var storeColor = this.basemapColorsStore.get(colorStr);
       var luminosity = storeColor ? storeColor.luminosity : 101;
-      console.assert(luminosity !== 101, "luminosity -- ", colorStr);
+      //console.assert(luminosity !== 101, "luminosity -- ", colorStr);
 
       var colorCell = put(parentNode, "div.color-cell", label);
       if(colorStr.search(this.hexColorRegEx) > -1) {
@@ -1488,29 +1498,29 @@ define([
      * @param undoItems
      * @param redoItems
      */
-    updateBasemapStyle: function (updateType, undoItems, redoItems) {
-      if(this.undoManager) {
-        // ALLOW UNDO/REDO OPERATION //
-        var styleUpdateOperation = new StyleUpdate({
-          label: updateType || StyleUpdate.defaultLabel,
-          store: this.styleLayersStore,
-          undoItems: undoItems,
-          redoItems: redoItems,
-          updateStyleCallback: function () {
+    /*updateBasemapStyle: function (updateType, undoItems, redoItems) {
+     if(this.undoManager) {
+     // ALLOW UNDO/REDO OPERATION //
+     var styleUpdateOperation = new StyleUpdate({
+     label: updateType || StyleUpdate.defaultLabel,
+     store: this.styleLayersStore,
+     undoItems: undoItems,
+     redoItems: redoItems,
+     updateStyleCallback: function () {
 
-            this.vectorBasemapStyle.layers = this.styleLayersStore.query();
+     this.vectorBasemapStyle.layers = this.styleLayersStore.query();
 
-            // SET STYLE OF VECTOR BASEMAP //
-            this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
-            // DISPLAY STYLE LAYERS //
-            this.displayStyleLayers(this.vectorBasemapStyle.layers);
+     // SET STYLE OF VECTOR BASEMAP //
+     this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
+     // DISPLAY STYLE LAYERS //
+     this.displayStyleLayers(this.vectorBasemapStyle.layers);
 
-          }.bind(this)
-        });
-        this.undoManager.add(styleUpdateOperation);
-      }
+     }.bind(this)
+     });
+     this.undoManager.add(styleUpdateOperation);
+     }
 
-    },
+     },*/
 
     /**
      * APPLY BASEMAP STYLE
