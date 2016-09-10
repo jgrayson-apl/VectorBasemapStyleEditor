@@ -58,14 +58,13 @@ define([
   "dojox/form/HorizontalRangeSlider",
   "esri/undoManager",
   "application/Operations/ApplyStyle",
-  "application/Operations/StyleUpdate",
   "application/dijit/ColorSelectorDialog",
   "application/jsoneditor-master/dist/jsoneditor"
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
              arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, vectorTile,
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
-             HorizontalRangeSlider, UndoManager, ApplyStyle, StyleUpdate, ColorSelectorDialog, JSONEditor) {
+             HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
   /**
    *
@@ -1505,36 +1504,6 @@ define([
       }.bind(this));
 
     },
-
-    /**
-     *
-     * @param updateType
-     * @param undoItems
-     * @param redoItems
-     */
-    /*updateBasemapStyle: function (updateType, undoItems, redoItems) {
-     if(this.undoManager) {
-     // ALLOW UNDO/REDO OPERATION //
-     var styleUpdateOperation = new StyleUpdate({
-     label: updateType || StyleUpdate.defaultLabel,
-     store: this.styleLayersStore,
-     undoItems: undoItems,
-     redoItems: redoItems,
-     updateStyleCallback: function () {
-
-     this.vectorBasemapStyle.layers = this.styleLayersStore.query();
-
-     // SET STYLE OF VECTOR BASEMAP //
-     this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
-     // DISPLAY STYLE LAYERS //
-     this.displayStyleLayers(this.vectorBasemapStyle.layers);
-
-     }.bind(this)
-     });
-     this.undoManager.add(styleUpdateOperation);
-     }
-
-     },*/
 
     /**
      * APPLY BASEMAP STYLE
