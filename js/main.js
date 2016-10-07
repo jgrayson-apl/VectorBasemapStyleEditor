@@ -801,19 +801,8 @@ define([
                     content: { f: "json" }
                   }).then(function (copyStyle) {
 
-                    //console.info("itemUrl: ", copyItem.itemUrl);
-                    console.info("source sprite: ", copyStyle.sprite);
-                    console.info("source glyphs: ", copyStyle.glyphs);
-
-                    // UPDATE STYLE TO USE USE GLYPHS AND SPRITES FROM COPY BASEMAP ITEM //
-                    /*var newStyle = lang.mixin({}, copyStyle, {
-                     glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", { item: copyItem, style: copyStyle }),
-                     sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", { item: copyItem, style: copyStyle })
-                     });*/
-
-                    var newStyle = lang.mixin({}, copyStyle);
-                    console.info("target sprite: ", newStyle.sprite);
-                    console.info("target glyphs: ", newStyle.glyphs);
+                    // COPY SOURCE STYLE //
+                    var newStyle = this._cloneVectorTileLayerStyle(copyStyle);
 
                     // URL INFO //
                     var urlInfo = {
