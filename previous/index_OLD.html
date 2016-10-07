@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-capable" content="no">
-    <link rel="stylesheet" href="//js.arcgis.com/3.18/dojox/form/resources/CheckedMultiSelect.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.18/dojox/form/resources/RangeSlider.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.18/esri/themes/calcite/dijit/calcite.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.18/esri/themes/calcite/esri/esri.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.16/dojox/form/resources/CheckedMultiSelect.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.16/dojox/form/resources/RangeSlider.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.16/esri/themes/calcite/dijit/calcite.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.16/esri/themes/calcite/esri/esri.css">
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./js/dijit/css/ColorSelectorDialog.css">
     <link rel="stylesheet" href="./js/jsoneditor-master/dist/jsoneditor.css">
@@ -20,13 +20,22 @@
         async: true,
         parseOnLoad: true,
         packages: [
-          { name: "application", location: package_path + '/js' },
-          { name: "config", location: package_path + '/config' },
-          { name: "arcgis_templates", location: package_path + '/..' }
+          {
+            name: "application",
+            location: package_path + '/js'
+          },
+          {
+            name: "config",
+            location: package_path + '/config'
+          },
+          {
+            name: "arcgis_templates",
+            location: package_path + '/..'
+          }
         ]
       };
     </script>
-    <script type="text/javascript" src="//js.arcgis.com/3.18/"></script>
+    <script type="text/javascript" src="//js.arcgis.com/3.16/"></script>
     <script type="text/javascript">
       require([
         "dojo/ready",
@@ -99,6 +108,9 @@
             <div id="home-button-node"></div>
             <div id="search-node"></div>
             <div id="zoom-node" class="dijitHidden">Zoom: 1</div>
+            <div id="eye-tool-node" class="dijitHidden">
+              <div id="eye-tool" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="label:'Pick Color',iconClass:'dijitCheckBoxIcon'"></div>
+            </div>
           </div>
         </div>
       </div>

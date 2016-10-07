@@ -40,6 +40,7 @@ define([
   "esri/dijit/HomeButton",
   "esri/dijit/Search",
   "esri/layers/VectorTileLayer",
+  "esri/layers/vector-tile",
   "dojo/store/Memory",
   "dojo/store/Observable",
   "dgrid/OnDemandList",
@@ -57,14 +58,13 @@ define([
   "dojox/form/HorizontalRangeSlider",
   "esri/undoManager",
   "application/Operations/ApplyStyle",
-  "application/Operations/StyleUpdate",
   "application/dijit/ColorSelectorDialog",
   "application/jsoneditor-master/dist/jsoneditor"
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
-             arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer,
+             arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer, vectorTile,
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
-             HorizontalRangeSlider, UndoManager, ApplyStyle, StyleUpdate, ColorSelectorDialog, JSONEditor) {
+             HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
   /**
    *
@@ -145,6 +145,8 @@ define([
      */
     constructor: function (config) {
       declare.safeMixin(this, config);
+      // PRESERVE DRAWING BUFFER SO WE CAN GET TO THE PIXELS WHEN USING THE PICK COLOR MAP TOOL //
+      vectorTile.Renderer.prototype.options.preserveDrawingBuffer = true;
     },
 
     /**
@@ -437,7 +439,7 @@ define([
           min: parseInt(item.minzoom || this.zoomRange.min, 10),
           max: parseInt(item.maxzoom || this.zoomRange.max, 10)
         };
-        Tooltip.show(lang.replace('<div style="width:120px;">Zoom Levels: {min} to {max}</div>', zoomLevelInfos), cell.element);
+        Tooltip.show(lang.replace("<div style='width:120px;'>Zoom Levels: {min} to {max}</div>", zoomLevelInfos), cell.element);
       }
     },
 
@@ -702,9 +704,6 @@ define([
         }).then(function (queryResponse) {
           // ESRI BASEMAPS ITEM STORE //
           this.esriBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
-          //
-          // TODO: TEMPORARILY DISABLED
-          //
           registry.byId("create-copy-btn").set("disabled", false);
         }.bind(this));
 
@@ -801,19 +800,11 @@ define([
                     content: { f: "json" }
                   }).then(function (copyStyle) {
 
-                    //console.info("itemUrl: ", copyItem.itemUrl);
-                    console.info("source sprite: ", copyStyle.sprite);
-                    console.info("source glyphs: ", copyStyle.glyphs);
-
                     // UPDATE STYLE TO USE USE GLYPHS AND SPRITES FROM COPY BASEMAP ITEM //
-                    /*var newStyle = lang.mixin({}, copyStyle, {
-                     glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", { item: copyItem, style: copyStyle }),
-                     sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", { item: copyItem, style: copyStyle })
-                     });*/
-
-                    var newStyle = lang.mixin({}, copyStyle);
-                    console.info("target sprite: ", newStyle.sprite);
-                    console.info("target glyphs: ", newStyle.glyphs);
+                    var newStyle = lang.mixin({}, copyStyle, {
+                      glyphs: lang.replace("{item.itemUrl}/resources/styles/{style.glyphs}", { item: copyItem, style: copyStyle }),
+                      sprite: lang.replace("{item.itemUrl}/resources/styles/{style.sprite}", { item: copyItem, style: copyStyle })
+                    });
 
                     // URL INFO //
                     var urlInfo = {
@@ -922,6 +913,9 @@ define([
           // INIT SEARCH //
           this.initSearch();
 
+          // INITIALIZE EYE TOOL //
+          this.initializeEyeTool();
+
         } else {
           // REMOVE PREVIOUS LAYERS //
           this.map.removeAllLayers();
@@ -1004,6 +998,54 @@ define([
         showInfoWindowOnSelect: false
       }, "search-node");
       this.search.startup();
+    },
+
+    /**
+     * INITIALIZE COLOR PICKER MAP TOOL
+     * - SEE CONSTRUCTOR FOR ADDITIONAL DETAILS...
+     */
+    initializeEyeTool: function () {
+
+      // ENABLE EYE TOOL //
+      domClass.remove("eye-tool-node", "dijitHidden");
+
+      // EYE TOOL //
+      this.eyeTool = registry.byId("eye-tool");
+
+      // MOUSE MOVE //
+      this.eyeTool.mapClickHandle = on.pausable(this.map, "click", function (evt) {
+
+        var glContext = this.vectorBasemapLayer.gl.painter.gl;
+
+        var pixelValues = new Uint8Array(4);
+        glContext.readPixels(evt.screenPoint.x, (this.map.height - evt.screenPoint.y), 1, 1, glContext.RGBA, glContext.UNSIGNED_BYTE, pixelValues);
+        var screenColor = new Color([pixelValues[0], pixelValues[1], pixelValues[2], pixelValues[3] / 255]);
+        var screenColorHex = screenColor.toHex().toUpperCase();
+
+        this._updateColorNode(this.replaceSourceColorNode, screenColorHex);
+        this.setColorSearch(screenColorHex);
+
+      }.bind(this));
+      this.eyeTool.mapClickHandle.pause();
+
+      // EYE TOOL TOGGLE //
+      this.eyeTool.on("change", function (checked) {
+        if(checked && this.vectorBasemapLayer) {
+
+          /* hhkaos
+          var tabPanel = registry.byId("main-center-pane");
+          var tabs = tabPanel.getChildren();
+          tabPanel.selectChild(tabs[1]);
+          */
+
+          this.map.setMapCursor("crosshair");
+          this.eyeTool.mapClickHandle.resume();
+        } else {
+          this.map.setMapCursor("default");
+          this.eyeTool.mapClickHandle.pause();
+        }
+      }.bind(this));
+
     },
 
     /**
@@ -1469,36 +1511,6 @@ define([
       }.bind(this));
 
     },
-
-    /**
-     *
-     * @param updateType
-     * @param undoItems
-     * @param redoItems
-     */
-    /*updateBasemapStyle: function (updateType, undoItems, redoItems) {
-     if(this.undoManager) {
-     // ALLOW UNDO/REDO OPERATION //
-     var styleUpdateOperation = new StyleUpdate({
-     label: updateType || StyleUpdate.defaultLabel,
-     store: this.styleLayersStore,
-     undoItems: undoItems,
-     redoItems: redoItems,
-     updateStyleCallback: function () {
-
-     this.vectorBasemapStyle.layers = this.styleLayersStore.query();
-
-     // SET STYLE OF VECTOR BASEMAP //
-     this.vectorBasemapLayer.setStyle(this._cloneVectorTileLayerStyle(this.vectorBasemapStyle));
-     // DISPLAY STYLE LAYERS //
-     this.displayStyleLayers(this.vectorBasemapStyle.layers);
-
-     }.bind(this)
-     });
-     this.undoManager.add(styleUpdateOperation);
-     }
-
-     },*/
 
     /**
      * APPLY BASEMAP STYLE

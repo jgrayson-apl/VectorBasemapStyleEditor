@@ -10,7 +10,7 @@ Edit the styles of Esri Vector Basemaps via ArcGIS.com items
 #### Deployment
 
  * Copy your application to a web accessible location
- * Create a new item in your org to your version of this application
+ * Create a new item in your Org to your version of this application
  * Register the new application item and make note of the App ID
  * In /config/default.js change the oauthappid to the above App ID
 
