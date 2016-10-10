@@ -188,12 +188,13 @@ define([
           put(deploymentList, "li", "In ../config/default.js change the oauthappid to the above App ID");
 
           // DETAILS //
-          put(welcomeContent, "div", "DETAILS");
+          put(welcomeContent, "div", "DETAILS - " + MainApp.version);
           var detailsList = put(welcomeContent, "ul.welcome-content");
           put(detailsList, "li", "Always make a backup copy of the item before using this app");
           put(detailsList, "li", "The user experience is focused on color replacement");
-          put(detailsList, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
+          //put(detailsList, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
           put(detailsList, "li", "Edit style json directly by clicking on 'id' cell. Warning: use caution!");
+          put(detailsList, "li", "The ‘Pick Color’ map tool has been removed.");
 
           // WELCOME DIALOG //
           var welcomeDlg = new ConfirmDialog({
@@ -1624,7 +1625,7 @@ define([
   };
 
   MainApp.appName = "Vector Basemap Style Editor";
-  MainApp.version = "0.1.1";
+  MainApp.version = "0.1.2";
 
   return MainApp;
 });
