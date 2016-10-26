@@ -1,6 +1,6 @@
 
 #### Live Demo
-   http://maps.esri.com/AGSJS_Demos/templates/VectorBasemapStyleEditor/
+- http://maps.esri.com/AGSJS_Demos/templates/VectorBasemapStyleEditor/ 
 
 #### Vector Basemap Style Editor
 NOTE: Edit the styles of Esri Vector Basemaps via ArcGIS.com items
