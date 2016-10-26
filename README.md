@@ -1,23 +1,22 @@
 
-#### Vector Basemap Style Editor
-Edit the styles of Esri Vector Basemaps via ArcGIS.com items
- * Always make a backup copy of the ArcGIS.com item before using this app
- * The user experience is focused on color replacement
- * The ‘Pick Color’ map tool only works on locations where styles don’t have opacity
- * Edit style json directly by clicking on 'id' cell. Warning: use caution!
+#### Live Demo
+   http://maps.esri.com/AGSJS_Demos/templates/VectorBasemapStyleEditor/
 
+#### Vector Basemap Style Editor
+NOTE: Edit the styles of Esri Vector Basemaps via ArcGIS.com items
+- Always make a backup copy of the ArcGIS.com item before using this app
+- The user experience is focused on color replacement
+- The ‘Pick Color’ map tool only works on locations where styles don’t have opacity
+- Edit style json directly by clicking on 'id' cell. Warning: use caution!
 
 #### Deployment
-
- * Copy your application to a web accessible location
- * Create a new item in your Org to your version of this application
- * Register the new application item and make note of the App ID
- * In /config/default.js change the oauthappid to the above App ID
-
+- Copy your application to a web accessible location
+- Create a new item in your Org to your version of this application
+- Register the new application item and make note of the App ID
+- In /config/default.js change the oauthappid to the above App ID
 
 #### Version
- * 0.1.2
-
+- 0.1.2
 
 > Copyright 2016 Esri
 >
