@@ -16,7 +16,7 @@ Edit the styles of Esri Vector Basemaps via ArcGIS.com items
 
 
 #### Version
- * 0.1.1
+ * 0.1.2
 
 
 > Copyright 2016 Esri
