@@ -57,14 +57,13 @@ define([
   "dojox/form/HorizontalRangeSlider",
   "esri/undoManager",
   "application/Operations/ApplyStyle",
-  "application/Operations/StyleUpdate",
   "application/dijit/ColorSelectorDialog",
   "application/jsoneditor-master/dist/jsoneditor"
 ], function (declare, lang, array, Color, colors, query, json, Deferred, all, on, dom, domAttr, domStyle, domClass, put,
              arcgisUtils, arcgisPortal, urlUtils, esriRequest, Map, IdentityManager, HomeButton, Search, VectorTileLayer,
              Memory, Observable, OnDemandList, OnDemandGrid, Selection, editor, DijitRegistry,
              registry, ConfirmDialog, ValidationTextBox, CheckBox, Select, Tooltip, UniqueComboBox,
-             HorizontalRangeSlider, UndoManager, ApplyStyle, StyleUpdate, ColorSelectorDialog, JSONEditor) {
+             HorizontalRangeSlider, UndoManager, ApplyStyle, ColorSelectorDialog, JSONEditor) {
 
   /**
    *
@@ -176,7 +175,7 @@ define([
           var welcomeContent = put("div");
 
           // WARNING //
-          put(welcomeContent, "div", { innerHTML: "<strong>W A R N I N G</strong>: this version of the application is going through some updates and may not work as expected." });
+          put(welcomeContent, "div", { innerHTML: "<strong>W A R N I N G</strong>: this application is going through some updates and may not work as expected." });
           put(welcomeContent, "br");
 
           // DEPLOYMENT //
@@ -923,6 +922,13 @@ define([
           content: { f: "json" }
         }).then(function (style) {
           console.info("root.json", style);
+
+          var isSecure = /https:/i;
+          if(isSecure.test(window.location.protocol)) {
+            style.glyphs = style.glyphs.replace(/http:/gi, "https:");
+            style.sprite = style.sprite.replace(/http:/gi, "https:");
+            style.sources.esri.url = style.sources.esri.url.replace(/http:/gi, "https:");
+          }
 
           // VECTOR BASEMAP LAYER //
           // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
