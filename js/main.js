@@ -752,7 +752,7 @@ define([
             createCopyDlg.selectedItem = evt.rows[0].data;
             itemTitleInput.set("value", this.suggestTitle(createCopyDlg.selectedItem.title));
           }.bind(this));
-          this.esriBasemapItemList.on("dgrid-deselect", function (evt) {
+          this.esriBasemapItemList.on("dgrid-deselect", function () {
             createCopyDlg.selectedItem = null;
             itemTitleInput.set("value", null);
           }.bind(this));

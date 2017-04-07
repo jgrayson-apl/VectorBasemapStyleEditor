@@ -25,14 +25,14 @@ define({
   "group": "",
   //Enter the url to the proxy if needed by the application. See the 'Using the proxy page' help topic for details
   //http://developers.arcgis.com/en/javascript/jshelp/ags_proxy.html
-  "proxyurl": "https://maps2.esri.com/proxy/DotNet/proxy.ashx",
+  "proxyurl": "https://maps.esri.com/proxy/DotNet/proxy.ashx",
   //Example of a template specific property. If your template had several color schemes
   //you could define the default here and setup configuration settings to allow users to choose a different
   //color theme.
   "theme": "blue",
   "bingKey": "", //Enter the url to your organizations bing maps key if you want to use bing basemaps
   //Defaults to arcgis.com. Set this value to your portal or organization host name.
-  "sharinghost": location.protocol  + "//www.arcgis.com",
+  "sharinghost": "https://www.arcgis.com",
   "units": null,
   //If your applcation needs to edit feature layer fields set this value to true. When false the map will
   //be dreated with layers that are not set to editable which allows the FeatureLayer to load features optimally. 
