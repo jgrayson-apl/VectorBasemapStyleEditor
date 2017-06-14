@@ -663,11 +663,13 @@ define([
       if(this.portalUser) {
 
         // USER VECTOR TILE BASEMAPS //
-        var itemQuery = 'owner:{username} AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
+        //var itemQuery = 'owner:{username} AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
+        var itemQuery = 'owner:{username} AND typekeywords:"Vector Tile Service"';
 
         // GET VECTOR TILE SERVICE ITEMS //
         this.portalUser.portal.queryItems({
-          q: lang.replace(itemQuery, this.portalUser)
+          q: lang.replace(itemQuery, this.portalUser),
+          num: 100
         }).then(function (queryResponse) {
           console.info("QUERY RESPONSE: ", queryResponse);
 
@@ -694,11 +696,13 @@ define([
 
         // ESRI VECTOR BASEMAPS GROUP  //
         //  - http://www.arcgis.com/home/group.html?id=30de8da907d240a0bccd5ad3ff25ef4a&focus=layers
-        var itemQuery = 'group:30de8da907d240a0bccd5ad3ff25ef4a AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
+        //var itemQuery = 'group:30de8da907d240a0bccd5ad3ff25ef4a AND typekeywords:"Vector Tile Service" AND -typekeywords:"Hosted"';
+        var itemQuery = 'group:30de8da907d240a0bccd5ad3ff25ef4a AND typekeywords:"Vector Tile Service"';
 
         // GET ESRI VECTOR TILE SERVICE ITEMS //
         this.portalUser.portal.queryItems({
-          q: lang.replace(itemQuery, this.portalUser)
+          q: lang.replace(itemQuery, this.portalUser),
+          num: 100
         }).then(function (queryResponse) {
           // ESRI BASEMAPS ITEM STORE //
           this.esriBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
