@@ -1033,10 +1033,10 @@ define([
         if(checked && this.vectorBasemapLayer) {
 
           /* hhkaos
-          var tabPanel = registry.byId("main-center-pane");
-          var tabs = tabPanel.getChildren();
-          tabPanel.selectChild(tabs[1]);
-          */
+           var tabPanel = registry.byId("main-center-pane");
+           var tabs = tabPanel.getChildren();
+           tabPanel.selectChild(tabs[1]);
+           */
 
           this.map.setMapCursor("crosshair");
           this.eyeTool.mapClickHandle.resume();
@@ -1473,20 +1473,16 @@ define([
 
       var filter = this.filterInput.get("value");
       if(filter && filter.length > 0) {
-        var styleId = item.id;
         var pattern = new RegExp(filter, "ig");
-        return isVisible && (pattern.test(styleSourceLayer) || pattern.test(styleId));
-
-      } else {
-
-        var isSourceLayer = true;
-        var selectedSourceLayer = this.sourceLayerList.get("value");
-        if(selectedSourceLayer) {
-          isSourceLayer = (selectedSourceLayer === styleSourceLayer);
-        }
-
-        return isSourceLayer && isVisible;
+        isVisible &= (pattern.test(styleSourceLayer) || pattern.test(item.id));
       }
+
+      var selectedSourceLayer = this.sourceLayerList.get("value");
+      if(selectedSourceLayer) {
+        isVisible &= (selectedSourceLayer === styleSourceLayer);
+      }
+
+      return isVisible;
     },
 
     /**

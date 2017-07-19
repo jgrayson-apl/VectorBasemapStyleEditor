@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-capable" content="no">
-    <link rel="stylesheet" href="//js.arcgis.com/3.19/dojox/form/resources/CheckedMultiSelect.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.19/dojox/form/resources/RangeSlider.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.19/esri/themes/calcite/dijit/calcite.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.19/esri/themes/calcite/esri/esri.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.21/dojox/form/resources/CheckedMultiSelect.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.21/dojox/form/resources/RangeSlider.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/themes/calcite/dijit/calcite.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/themes/calcite/esri/esri.css">
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./js/dijit/css/ColorSelectorDialog.css">
     <link rel="stylesheet" href="./js/jsoneditor-master/dist/jsoneditor.css">
@@ -26,7 +26,7 @@
         ]
       };
     </script>
-    <script type="text/javascript" src="//js.arcgis.com/3.19/"></script>
+    <script type="text/javascript" src="//js.arcgis.com/3.21/"></script>
     <script type="text/javascript">
       require([
         "dojo/ready",
@@ -86,7 +86,6 @@
             <div id="update-btn-node">
               <div id="undo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Undo'">&#x21b6;</div>
               <div id="redo-btn" class="undo-redo-btn" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Redo'">&#x21b7;</div>
-              <!--<div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Basemap Item',disabled:true"></div>-->
               <div id="update-btn" data-dojo-type="dijit/form/Button" data-dojo-props="label:'Update Item',disabled:true"></div>
             </div>
           </div>
@@ -97,6 +96,9 @@
         <div id="main-right-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
           <div id="map-node" dir="ltr">
             <div id="home-button-node"></div>
+            <div id="eye-tool-node" class="dijitHidden">
+              <div id="eye-tool" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="label:'Pick Color',iconClass:'dijitCheckBoxIcon'"></div>
+            </div>
             <div id="search-node"></div>
             <div id="zoom-node" class="dijitHidden">Zoom: 1</div>
           </div>
@@ -110,14 +112,16 @@
             <span id="select-none-filter" class="select-node dijitHidden" title="Display NONE"></span>
             <span data-dojo-type="dijit/ToolbarSeparator" class="dijitHidden"></span>
             <!--<label for="current-zoom-chk" class="search-label">Current map zoom level:</label>-->
-            <label for="current-zoom-chk" class="search-label">Current zoom:</label>
+            <label for="current-zoom-chk" class="search-label">Current Zoom Level:</label>
             <div id="current-zoom-chk" data-dojo-type="dijit/form/CheckBox" data-dojo-props="checked:false"></div>
-            <span data-dojo-type="dijit/ToolbarSeparator"></span>
+            <!--<span data-dojo-type="dijit/ToolbarSeparator"></span>-->
             <label for="filter-input" class="search-label">Search:</label>
             <div id="filter-input" data-dojo-type="dijit/form/TextBox" data-dojo-props="intermediateChanges:true,placeHolder:'enter filter here',style:{width:'200px'}"></div>
             <!--<span data-dojo-type="dijit/ToolbarSeparator"></span>-->
             <span class="search-label">source-layer:</span>
             <span id="source-layer-combo"></span>
+            <!--<span class="search-label">type:</span>-->
+            <!--<div id="style-layer-type-select-2" data-dojo-type="dijit/form/Select" data-dojo-props="labelAttr:'name'"></div>-->
           </div>
           <div id="full-list-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
             <div id="full-list-node"></div>

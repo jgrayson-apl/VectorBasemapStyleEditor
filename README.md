@@ -1,6 +1,6 @@
 
 #### Live Demo
-- http://maps.esri.com/jg/VectorBasemapStyleEditor/ 
+- https://maps.esri.com/jg/VectorBasemapStyleEditor/ 
 
 #### Vector Basemap Style Editor
 Edit the styles of Esri Vector Basemaps via ArcGIS.com items
@@ -15,9 +15,15 @@ Edit the styles of Esri Vector Basemaps via ArcGIS.com items
 - In /config/default.js change the oauthappid to the above App ID
 
 #### Version
-- 0.1.2
+- 0.1.3
+    - JS API 3.21
+    - The 'Pick Color' tool has been added back to UI 
+    - The ‘Pick Color’ tool only works on locations where styles don’t have opacity
 
-> Copyright 2016 Esri
+
+#### License
+
+> Copyright 2017 Esri
 >
 > Licensed under the Apache License, Version 2.0 (the "License");
 > you may not use this file except in compliance with the License.

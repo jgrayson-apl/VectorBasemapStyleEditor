@@ -175,8 +175,8 @@ define([
           var welcomeContent = put("div");
 
           // WARNING //
-          put(welcomeContent, "div", { innerHTML: "<strong>W A R N I N G</strong>: this application is going through some updates and may not work as expected." });
-          put(welcomeContent, "br");
+          //put(welcomeContent, "div", { innerHTML: "<strong>W A R N I N G</strong>: this application is going through some updates and may not work as expected." });
+          //put(welcomeContent, "br");
 
           // DEPLOYMENT //
           put(welcomeContent, "div", "DEPLOYMENT");
@@ -187,13 +187,18 @@ define([
           put(deploymentList, "li", "In ../config/default.js change the oauthappid to the above App ID");
 
           // DETAILS //
-          put(welcomeContent, "div", "DETAILS - " + MainApp.version);
+          put(welcomeContent, "div", "DETAILS");
           var detailsList = put(welcomeContent, "ul.welcome-content");
           put(detailsList, "li", "Always make a backup copy of the item before using this app");
           put(detailsList, "li", "The user experience is focused on color replacement");
-          //put(detailsList, "li", "The ‘Pick Color’ map tool only works on locations where styles don’t have opacity");
           put(detailsList, "li", "Edit style json directly by clicking on 'id' cell. Warning: use caution!");
-          put(detailsList, "li", "The ‘Pick Color’ map tool has been removed.");
+
+          // VERSION //
+          put(welcomeContent, "div", "VERSION - " + MainApp.version);
+          var versionList = put(welcomeContent, "ul.welcome-content");
+          put(versionList, "li", "JS API 3.21");
+          put(versionList, "li", "The 'Pick Color' tool has been added back to UI");
+          put(versionList, "li", "The ‘Pick Color’ tool only works on locations where styles don’t have opacity");
 
           // WELCOME DIALOG //
           var welcomeDlg = new ConfirmDialog({
@@ -481,6 +486,14 @@ define([
       }.bind(this));
       this.paintColorTypeSelect.set("store", this.styleLayerTypesStore);
 
+      /*
+       this.paintColorTypeSelect2 = registry.byId("style-layer-type-select-2");
+       this.paintColorTypeSelect2.on("change", function () {
+       this.styleLayersList.refresh();
+       }.bind(this));
+       this.paintColorTypeSelect2.set("store", this.styleLayerTypesStore);
+       */
+
     },
 
     /**
@@ -706,9 +719,6 @@ define([
         }).then(function (queryResponse) {
           // ESRI BASEMAPS ITEM STORE //
           this.esriBasemapsItemsStore = new Observable(new Memory({ data: queryResponse.results }));
-          //
-          // TODO: TEMPORARILY DISABLED
-          //
           registry.byId("create-copy-btn").set("disabled", false);
         }.bind(this));
 
@@ -915,6 +925,9 @@ define([
           // INIT SEARCH //
           this.initSearch();
 
+          // INITIALIZE EYE TOOL //
+          this.initializeEyeTool();
+
         } else {
           // REMOVE PREVIOUS LAYERS //
           this.map.removeAllLayers();
@@ -1004,6 +1017,61 @@ define([
         showInfoWindowOnSelect: false
       }, "search-node");
       this.search.startup();
+    },
+
+
+    /**
+     * INITIALIZE COLOR PICKER MAP TOOL
+     * - SEE CONSTRUCTOR FOR ADDITIONAL DETAILS...
+     */
+    initializeEyeTool: function () {
+
+      // ENABLE EYE TOOL //
+      domClass.remove("eye-tool-node", "dijitHidden");
+
+      // EYE TOOL //
+      this.eyeTool = registry.byId("eye-tool");
+
+      // MOUSE CLICK //
+      this.eyeTool.mapClickHandle = on.pausable(this.map, "click", function (evt) {
+        // TAKE SCREENSHOT //
+        this.vectorBasemapLayer.takeScreenshot().then(function (screenshotInfo) {
+          //console.info("SCREENSHOT: ", evt, screenshotInfo);
+
+          // Based on https://stackoverflow.com/questions/3528299/get-pixel-color-of-base64-png-using-javascript //
+          var image = new Image();
+          image.onload = function () {
+            var canvas = put("canvas", { width: screenshotInfo.width, height: screenshotInfo.height });
+            var context = canvas.getContext("2d");
+            context.drawImage(image, screenshotInfo.x, screenshotInfo.y);
+            var imageData = context.getImageData(screenshotInfo.x, screenshotInfo.y, screenshotInfo.width, screenshotInfo.height);
+            var index = (evt.offsetY * imageData.width + evt.offsetX) * 4;
+            var red = imageData.data[index];
+            var green = imageData.data[index + 1];
+            var blue = imageData.data[index + 2];
+
+            var screenColor = new Color([red, green, blue]);
+            var screenColorHex = screenColor.toHex().toUpperCase();
+            this._updateColorNode(this.replaceSourceColorNode, screenColorHex);
+            this.setColorSearch(screenColorHex);
+          }.bind(this);
+          image.src = screenshotInfo.dataURL;
+        }.bind(this));
+      }.bind(this));
+      this.eyeTool.mapClickHandle.pause();
+
+      // EYE TOOL TOGGLE //
+      this.eyeTool.on("change", function (checked) {
+        if(checked && this.vectorBasemapLayer) {
+          registry.byId("main-center-pane").selectChild(registry.byId("search-container")); // hhkaos //
+          this.map.setMapCursor("crosshair");
+          this.eyeTool.mapClickHandle.resume();
+        } else {
+          this.eyeTool.mapClickHandle.pause();
+          this.map.setMapCursor("default");
+        }
+      }.bind(this));
+
     },
 
     /**
@@ -1419,7 +1487,7 @@ define([
      *
      * @param item
      */
-    searchBySourceLayers: function (item) {
+    searchBySourceLayers_prev: function (item) {
 
       var isVisible = true;
       if(registry.byId("current-zoom-chk").get("checked")) {
@@ -1445,6 +1513,35 @@ define([
 
         return isSourceLayer && isVisible;
       }
+    },
+
+    /**
+     * DISPLAY STYLES BASED ON VISIBILITY, FILTER, AND/OR SOURCE LAYER
+     *
+     * @param item
+     */
+    searchBySourceLayers: function (item) {
+
+      var isVisible = true;
+      if(registry.byId("current-zoom-chk").get("checked")) {
+        var mapZoom = this.map.getZoom();
+        isVisible = (mapZoom >= (item.minzoom || this.zoomRange.min)) && (mapZoom <= (item.maxzoom || this.zoomRange.max));
+      }
+
+      var styleSourceLayer = item["source-layer"];
+
+      var filter = this.filterInput.get("value");
+      if(filter && filter.length > 0) {
+        var pattern = new RegExp(filter, "ig");
+        isVisible &= (pattern.test(styleSourceLayer) || pattern.test(item.id));
+      } else {
+        var selectedSourceLayer = this.sourceLayerList.get("value");
+        if(selectedSourceLayer) {
+          isVisible &= (selectedSourceLayer === styleSourceLayer);
+        }
+      }
+
+      return isVisible;
     },
 
     /**
@@ -1635,7 +1732,7 @@ define([
   };
 
   MainApp.appName = "Vector Basemap Style Editor";
-  MainApp.version = "0.1.2";
+  MainApp.version = "0.1.3";
 
   return MainApp;
 });
