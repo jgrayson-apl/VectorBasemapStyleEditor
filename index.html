@@ -42,7 +42,8 @@
         "dijit/form/Button",
         "dijit/form/CheckBox",
         "dijit/form/Select",
-        "dojox/form/CheckedMultiSelect"
+        "dojox/form/CheckedMultiSelect",
+        "dojox/image/MagnifierLite"
       ], function (ready, lang, templateConfig, Template, Main) {
 
         Main.displayMessage("Welcome...");
@@ -96,8 +97,12 @@
         <div id="main-right-pane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
           <div id="map-node" dir="ltr">
             <div id="home-button-node"></div>
-            <div id="eye-tool-node" class="dijitHidden">
+            <div id="eye-tool-node" class="dijitHidden" style="text-align:center;">
               <div id="eye-tool" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="label:'Pick Color',iconClass:'dijitCheckBoxIcon'"></div>
+              <div style="padding:5px;">
+                <div id="find-nearest-chk" data-dojo-type="dijit/form/CheckBox"></div>
+                <label for="find-nearest-chk" title="If the exact color is not found, find and use the 'nearest' color based on r,g,b values...">Find Similar</label>
+              </div>
             </div>
             <div id="search-node"></div>
             <div id="zoom-node" class="dijitHidden">Zoom: 1</div>

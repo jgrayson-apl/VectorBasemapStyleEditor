@@ -199,6 +199,7 @@ define([
           put(versionList, "li", "JS API 3.21");
           put(versionList, "li", "The 'Pick Color' tool has been added back to UI");
           put(versionList, "li", "The ‘Pick Color’ tool only works on locations where styles don’t have opacity");
+          put(versionList, "li", "The 'Find Similar' option will try to find the 'nearest' color when the exact color is not found");
 
           // WELCOME DIALOG //
           var welcomeDlg = new ConfirmDialog({
@@ -1036,8 +1037,6 @@ define([
       this.eyeTool.mapClickHandle = on.pausable(this.map, "click", function (evt) {
         // TAKE SCREENSHOT //
         this.vectorBasemapLayer.takeScreenshot().then(function (screenshotInfo) {
-          //console.info("SCREENSHOT: ", evt, screenshotInfo);
-
           // Based on https://stackoverflow.com/questions/3528299/get-pixel-color-of-base64-png-using-javascript //
           var image = new Image();
           image.onload = function () {
@@ -1049,8 +1048,9 @@ define([
             var red = imageData.data[index];
             var green = imageData.data[index + 1];
             var blue = imageData.data[index + 2];
-
-            var screenColor = new Color([red, green, blue]);
+            var imageColor = new Color([red, green, blue]);
+            var findNearest = registry.byId("find-nearest-chk").get("checked");
+            var screenColor = findNearest ? this._findNearestColor(imageColor) : imageColor;
             var screenColorHex = screenColor.toHex().toUpperCase();
             this._updateColorNode(this.replaceSourceColorNode, screenColorHex);
             this.setColorSearch(screenColorHex);
@@ -1564,6 +1564,34 @@ define([
         this.styleLayersStore.put(updatedItem);
         this.applyBasemapStyle("Style JSON Edit");
       }.bind(this));
+
+    },
+
+
+    /**
+     *
+     * @param screenColor
+     * @returns {Color}
+     * @private
+     */
+    _findNearestColor: function (screenColor) {
+      var screenColorHex = screenColor.toHex().toUpperCase();
+      var storeColor = this.basemapColorsStore.get(screenColorHex);
+      if(storeColor) {
+        return new Color(storeColor.color);
+      } else {
+        // Adapted from https://github.com/dtao/nearest-color/blob/master/nearestColor.js //
+        var nearestColorInfo = { minDistance: Infinity, nearestColor: null };
+        this.basemapColorsStore.query().forEach(function (basemapColorItem) {
+          var basemapColor = new Color(basemapColorItem.color);
+          var distance = Math.sqrt(Math.pow(screenColor.r - basemapColor.r, 2) + Math.pow(screenColor.g - basemapColor.g, 2) + Math.pow(screenColor.b - basemapColor.b, 2));
+          if(distance < nearestColorInfo.minDistance) {
+            nearestColorInfo.minDistance = distance;
+            nearestColorInfo.nearestColor = basemapColor;
+          }
+        }.bind(this));
+        return nearestColorInfo.nearestColor;
+      }
 
     },
 
