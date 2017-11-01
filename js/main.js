@@ -655,7 +655,7 @@ define([
       var jsonEditorOptions = {
         editable: function (node) {
           return {
-            field: false,
+            field: true,  // https://github.com/jgrayson-apl/VectorBasemapStyleEditor/issues/7
             value: true
           };
         }
@@ -1027,7 +1027,7 @@ define([
      */
     initializeEyeTool: function () {
 
-      // ENABLE EYE TOOL //
+      // DISPLAY EYE TOOLS NODE //
       domClass.remove("eye-tool-node", "dijitHidden");
 
       // EYE TOOL //
@@ -1038,6 +1038,7 @@ define([
         // TAKE SCREENSHOT //
         this.vectorBasemapLayer.takeScreenshot().then(function (screenshotInfo) {
           // Based on https://stackoverflow.com/questions/3528299/get-pixel-color-of-base64-png-using-javascript //
+          // CREATE SCREENSHOT IMAGE //
           var image = new Image();
           image.onload = function () {
             var canvas = put("canvas", { width: screenshotInfo.width, height: screenshotInfo.height });
@@ -1054,7 +1055,9 @@ define([
             var screenColorHex = screenColor.toHex().toUpperCase();
             this._updateColorNode(this.replaceSourceColorNode, screenColorHex);
             this.setColorSearch(screenColorHex);
+            put(canvas, "!");
           }.bind(this);
+          // SET SCREENSHOT AS IMAGE SOURCE //
           image.src = screenshotInfo.dataURL;
         }.bind(this));
       }.bind(this));
