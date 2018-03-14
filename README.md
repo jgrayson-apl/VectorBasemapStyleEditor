@@ -15,11 +15,8 @@ Edit the styles of Esri Vector Basemaps via ArcGIS.com items
 - In /config/default.js change the oauthappid to the above App ID
 
 #### Version
-- 0.1.3
-    - JS API 3.21
-    - The 'Pick Color' tool has been added back to UI 
-    - The ‘Pick Color’ tool only works on locations where styles don’t have opacity
-    - The 'Find Similar' option will try to find the 'nearest' color when the exact color is not found
+- 0.1.4
+    - JS API 3.23    
 
 
 #### License

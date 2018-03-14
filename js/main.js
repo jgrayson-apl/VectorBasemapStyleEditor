@@ -1763,7 +1763,7 @@ define([
   };
 
   MainApp.appName = "Vector Basemap Style Editor";
-  MainApp.version = "0.1.3";
+  MainApp.version = "0.1.4";
 
   return MainApp;
 });
