@@ -941,18 +941,26 @@ define([
         }).then(function (style) {
           console.info("root.json", style);
 
+
+            //需要把style里的url处理为绝对路径
+            //.....
+          style.sources.esri.url = this.selectedItem.url;
+            style.sprite = this.selectedItem.url + "/resources/sprites/sprite";
+            style.glyphs = this.selectedItem.url + "/resources/fonts/{fontstack}/{range}.pbf";
           var isSecure = /https:/i;
           if(isSecure.test(window.location.protocol)) {
             style.glyphs = style.glyphs.replace(/http:/gi, "https:");
             style.sprite = style.sprite.replace(/http:/gi, "https:");
             style.sources.esri.url = style.sources.esri.url.replace(/http:/gi, "https:");
-          }
+            }
+
+            
 
           // VECTOR BASEMAP LAYER //
           // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
           //   HERE WE PASS IN THE STYLE DIRECTLY INTO THE CONSTRUCTOR
-          //this.vectorBasemapLayer = new VectorTileLayer(this._cloneVectorTileLayerStyle(style));
-            this.vectorBasemapLayer = new VectorTileLayer(lang.replace("{url}/resources/styles/root.json", this.selectedItem));
+          this.vectorBasemapLayer = new VectorTileLayer(this._cloneVectorTileLayerStyle(style));
+            //this.vectorBasemapLayer = new VectorTileLayer(lang.replace("{url}/resources/styles/root.json", this.selectedItem));
           this.vectorBasemapLayer.on("error", function (evt) {
             console.warn("vectorBasemapLayer.error: ", evt.error);
           }.bind(this));
