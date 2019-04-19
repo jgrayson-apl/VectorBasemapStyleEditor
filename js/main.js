@@ -936,7 +936,7 @@ define([
 
         // GET STYLE //
         esriRequest({
-          url: lang.replace("{itemUrl}/resources/styles/root.json", this.selectedItem),
+          url: lang.replace("{url}/resources/styles/root.json", this.selectedItem),
           content: { f: "json" }
         }).then(function (style) {
           console.info("root.json", style);
@@ -951,7 +951,8 @@ define([
           // VECTOR BASEMAP LAYER //
           // - THERE ARE SEVERAL WAYS TO CREATE VECTORTILELAYER...
           //   HERE WE PASS IN THE STYLE DIRECTLY INTO THE CONSTRUCTOR
-          this.vectorBasemapLayer = new VectorTileLayer(this._cloneVectorTileLayerStyle(style));
+          //this.vectorBasemapLayer = new VectorTileLayer(this._cloneVectorTileLayerStyle(style));
+            this.vectorBasemapLayer = new VectorTileLayer(lang.replace("{url}/resources/styles/root.json", this.selectedItem));
           this.vectorBasemapLayer.on("error", function (evt) {
             console.warn("vectorBasemapLayer.error: ", evt.error);
           }.bind(this));
