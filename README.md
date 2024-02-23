@@ -34,3 +34,8 @@ Edit the styles of Esri Vector Basemaps via ArcGIS.com items
 > WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 > See the License for the specific language governing permissions and
 > limitations under the License.
+
+### 关于SetStyle错误的问题
+- https://developers.arcgis.com/javascript/3/jsapi/vectortilelayer-amd.html#setstyle
+
+- Changes the style properties used to render the layers. It is the equivalent of changing the entire CSS style sheet for a web page. It takes either a style object or a url to a style resource. When loading a style, it is the developer's responsibility to make sure that any relative urls in the style resolve correctly.(要由开发者对url路径进行处理！！！）
